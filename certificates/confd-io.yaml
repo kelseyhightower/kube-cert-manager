@@ -1,0 +1,9 @@
+apiVersion: "stable.hightower.com/v1"
+kind: "Certificate"
+metadata:
+  name: "confd-dot-io"
+spec:
+  domain: "confd.io"
+  email: "kelsey.hightower@gmail.com"
+  project: "hightowerlabs"
+  serviceAccount: "hightowerlabs"

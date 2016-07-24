@@ -1,0 +1,33 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: dynamic-certs
+  labels:
+    app: dynamic-certs
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: dynamic-certs
+    spec:
+      containers:
+      - name: dynamic-certs
+        image: kelseyhightower/dynamic-certs:1.0.0
+        args:
+          - "-tls-cert=/etc/tls/tls.crt"
+          - "-tls-key=/etc/tls/tls.key"
+        imagePullPolicy: Always
+        ports:
+          - containerPort: 443 
+        resources:
+          limits:
+            memory: "50Mi"
+            cpu: ".1"
+        volumeMounts:
+          - name: dynamic-certs-tls
+            mountPath: /etc/tls
+      volumes:
+        - name: dynamic-certs-tls
+          secret:
+            secretName: dynamic-certs-tls
