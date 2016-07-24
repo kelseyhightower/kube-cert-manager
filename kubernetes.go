@@ -190,13 +190,13 @@ func syncKubernetesSecret(domain string, cert, key []byte) error {
 			if resp.StatusCode != 200 {
 				return errors.New("Updating secret failed:" + resp.Status)
 			}
-			log.Println("Syncing secret [%s] complete.", domain)
+			log.Printf("Syncing secret [%s] complete.", domain)
 		}
 		return nil
 	}
 
 	if resp.StatusCode == 404 {
-		log.Println("Secret [%s] not found. Creating...", domain)
+		log.Printf("Secret [%s] not found. Creating...", domain)
 		b := make([]byte, 0)
 		body := bytes.NewBuffer(b)
 		err := json.NewEncoder(body).Encode(secret)
