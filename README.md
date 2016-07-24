@@ -31,7 +31,7 @@ versions:
 ```
 
 ```
-kubectl create -f kubernetes/extensions/certificate.yaml 
+kubectl create -f extensions/certificate.yaml 
 ```
 
 ### Create a `certificate` object
