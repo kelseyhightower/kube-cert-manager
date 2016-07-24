@@ -178,7 +178,7 @@ tls.key:     1679 bytes
 
 ### Deleting a Certificate
 
-Deleting a certificate object will cause the `kube-cert-manager` to delete the Kubernetes TLS secret holding the LetsEncrypt certificate and private.
+Deleting a certificate object will cause the `kube-cert-manager` to delete the Kubernetes TLS secret holding the LetsEncrypt certificate and private key.
 
 ```
 kubectl delete certificates hightowerlabs-dot-com
