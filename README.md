@@ -24,17 +24,7 @@ The `kube-cert-manager` requires a [Google Cloud DNS](https://cloud.google.com/d
 
 ### Create the Certificate ThirdParty Resource
 
-The `kube-cert-manager` is driven by Kubernetes Certificate objects. Certificates are not a core Kubernetes kind, but can be defined using the following `ThirdPartyResource`:
-
-```
-apiVersion: extensions/v1beta1
-kind: ThirdPartyResource
-description: "A specification of a Let's Encrypt Certificate to manage."
-metadata:
-  name: "certificate.stable.hightower.com"
-versions:
-  - name: v1
-```
+The `kube-cert-manager` is driven by [Kubernetes Certificate Objects](docs/certificate-objects.md). Certificates are not a core Kubernetes kind, but can be enabled with the [Certificate Third Party Resource](docs/certificate-third-party-resource.md):
 
 Create the Certificate Third Party Resource:
 
