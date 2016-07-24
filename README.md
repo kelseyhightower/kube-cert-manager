@@ -49,7 +49,7 @@ spec:
 ```
 
 ```
-kubectl create -f kubernetes/certificates/hightowerlabs-com.yaml
+kubectl create -f certificates/hightowerlabs-com.yaml
 ```
 
 ### Create A Google Cloud Service Account Secret
