@@ -14,7 +14,7 @@ This is not an official Google Project.
 * Demonstrate how to use Kubernetes [Third Party Resources](https://github.com/kubernetes/kubernetes/blob/release-1.3/docs/design/extending-api.md).
 * Demonstrate how interact with the Kubernetes API (watches, reconciliation, etc).
 * Demonstrate how to write great documentation for Kubernetes add-ons and extensions.
-* Promote the usage of Let's Encrypt for securing web application running on Kubernetes.
+* Promote the usage of Let's Encrypt for securing web applications running on Kubernetes.
 
 ## Requirements
 
