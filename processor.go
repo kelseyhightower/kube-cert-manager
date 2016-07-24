@@ -50,19 +50,24 @@ func processCertificateEvent(c CertificateEvent, db *bolt.DB) error {
 }
 
 func deleteCertificate(c Certificate, db *bolt.DB) error {
-	log.Printf("Deleting %s certificate...", c.Spec.Domain)
+	log.Printf("Deleting Let's Encrypt account: %s", c.Spec.Domain)
+	err := deleteAccount(c.Spec.Domain, db)
+	if err != nil {
+		return errors.New("Error deleting the Let's Encrypt account " + err.Error())
+	}
+	log.Printf("Deleting Kubernetes TLS secret: %s", c.Spec.Domain)
 	return deleteKubernetesSecret(c.Spec.Domain)
 }
 
 func processCertificate(c Certificate, db *bolt.DB) error {
-	account, err := findAccount(c.Spec.Email, db)
+	account, err := findAccount(c.Spec.Domain, db)
 	if err != nil {
 		return err
 	}
 
 	if account == nil {
-		log.Printf("ACME account for %s not found. Creating new account.", c.Spec.Email)
-		account, err = newAccount(c.Spec.Email)
+		log.Printf("Creating new Let's Encrypt account: %s", c.Spec.Domain)
+		account, err = newAccount(c.Spec.Email, c.Spec.Domain)
 		if err != nil {
 			return err
 		}
@@ -70,13 +75,13 @@ func processCertificate(c Certificate, db *bolt.DB) error {
 
 	acmeClient, err := newACMEClient(discoveryURL, account.AccountKey)
 	if err != nil {
-		return errors.New("Error creating ACME client:" + err.Error())
+		return errors.New("Error creating ACME client: " + err.Error())
 	}
 
 	if account.Account.URI == "" {
 		err = acmeClient.Register(account.Account)
 		if err != nil {
-			return errors.New("Error registering account" + err.Error())
+			return errors.New("Error registering account: " + err.Error())
 		}
 		account.Account.AgreedTerms = account.Account.CurrentTerms
 		err = acmeClient.UpdateReg(account.Account.URI, account.Account)
@@ -91,7 +96,7 @@ func processCertificate(c Certificate, db *bolt.DB) error {
 	}
 
 	if account.CertificateURL != "" {
-		log.Printf("Fetching existing certificate for %s.", c.Spec.Domain)
+		log.Printf("Syncing Kubernetes secret: %s", c.Spec.Domain)
 		cert, err := acmeClient.RenewCert(account.CertificateURL)
 		if err != nil {
 			return errors.New("Error renewing certificate" + err.Error())
@@ -104,7 +109,7 @@ func processCertificate(c Certificate, db *bolt.DB) error {
 		})
 		err = syncKubernetesSecret(c.Spec.Domain, account.Certificate, key)
 		if err != nil {
-			return errors.New("Error creating Kubernetes secret " + err.Error())
+			return errors.New("Error creating Kubernetes secret: " + err.Error())
 		}
 		return nil
 	}
@@ -165,7 +170,7 @@ func processCertificate(c Certificate, db *bolt.DB) error {
 	})
 	err = syncKubernetesSecret(c.Spec.Domain, account.Certificate, key)
 	if err != nil {
-		return errors.New("Error creating Kubernetes secret " + err.Error())
+		return errors.New("Error creating Kubernetes secret: " + err.Error())
 	}
 
 	err = googleDNSClient.DeleteDNSRecord(fqdn)

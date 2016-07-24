@@ -1,9 +1,0 @@
-apiVersion: "stable.hightower.com/v1"
-kind: "Certificate"
-metadata:
-  name: "example-dot-com"
-spec:
-  domain: "example.com"
-  email: "kelsey.hightower@gmail.com"
-  project: "hightowerlabs"
-  serviceAccount: "hightowerlabs"

@@ -35,6 +35,7 @@ type Account struct {
 	Certificate    []byte
 	CertificateKey *rsa.PrivateKey
 	CertificateURL string
+	Domain         string
 }
 
 type ACMEClient struct {
@@ -188,7 +189,7 @@ func (c *ACMEClient) RenewCert(certURL string) ([]byte, error) {
 	return pemEncodedCert, nil
 }
 
-func newAccount(email string) (*Account, error) {
+func newAccount(email, domain string) (*Account, error) {
 	var account *Account
 
 	accountKey, err := rsa.GenerateKey(rand.Reader, 2048)
@@ -209,14 +210,15 @@ func newAccount(email string) (*Account, error) {
 		AccountKey:     accountKey,
 		Email:          email,
 		CertificateKey: certificateKey,
+		Domain:         domain,
 	}
 	return account, nil
 }
 
-func findAccount(email string, db *bolt.DB) (*Account, error) {
+func findAccount(domain string, db *bolt.DB) (*Account, error) {
 	var account *Account
 	err := db.View(func(tx *bolt.Tx) error {
-		data := tx.Bucket([]byte("Accounts")).Get([]byte(email))
+		data := tx.Bucket([]byte("Accounts")).Get([]byte(domain))
 		if data == nil {
 			return nil
 		}
@@ -243,7 +245,7 @@ func saveAccount(account *Account, db *bolt.DB) error {
 			return err
 		}
 		bucket := tx.Bucket([]byte("Accounts"))
-		err = bucket.Put([]byte(account.Email), data.Bytes())
+		err = bucket.Put([]byte(account.Domain), data.Bytes())
 		if err != nil {
 			return err
 		}
@@ -252,9 +254,9 @@ func saveAccount(account *Account, db *bolt.DB) error {
 	return err
 }
 
-func deleteAccount(email string, db *bolt.DB) error {
+func deleteAccount(domain string, db *bolt.DB) error {
 	err := db.Update(func(tx *bolt.Tx) error {
-		return tx.Bucket([]byte("Accounts")).Delete([]byte(email))
+		return tx.Bucket([]byte("Accounts")).Delete([]byte(domain))
 	})
 	return err
 }

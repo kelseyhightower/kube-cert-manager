@@ -63,7 +63,7 @@ func main() {
 
 	// Watch for events that add, modify, or delete Certificate definitions and
 	// process them asynchronously.
-	log.Println("Watching for certificate changes...")
+	log.Println("Watching for certificate events...")
 	events, errs := watchCertificateEvents()
 
 	// Start the certificate reconciler that will ensure all Certificate
@@ -75,7 +75,7 @@ func main() {
 	for {
 		select {
 		case event := <-events:
-			log.Printf("Processing certificate event for %s", event.Object.Metadata["name"])
+			log.Printf("Processing certificate event: %s", event.Object.Metadata["name"])
 			err := processCertificateEvent(event, db)
 			if err != nil {
 				log.Println(err)
