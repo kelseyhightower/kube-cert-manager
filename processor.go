@@ -11,13 +11,12 @@ import (
 	"github.com/google/acme"
 )
 
-func syncCertificates(db *bolt.DB) <-chan error {
+func syncCertificates(interval int, db *bolt.DB) <-chan error {
 	errc := make(chan error, 1)
-	log.Println("Starting reconciliation loop...")
 	go func() {
 		for {
 			var err error
-			time.Sleep(30 * time.Second)
+			time.Sleep(interval * time.Second)
 			var certificates []Certificate
 			for {
 				certificates, err = getCertificates()

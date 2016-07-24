@@ -13,11 +13,13 @@ import (
 var (
 	dataDir      = "/var/lib/cert-manager"
 	discoveryURL = "https://acme-staging.api.letsencrypt.org/directory"
+	syncInterval = 120
 )
 
 func main() {
-	flag.StringVar(&dataDir, "data-dir", dataDir, "Data directory path")
-	flag.StringVar(&discoveryURL, "amce-url", discoveryURL, "AMCE endpoint")
+	flag.StringVar(&dataDir, "data-dir", dataDir, "Data directory path.")
+	flag.StringVar(&discoveryURL, "amce-url", discoveryURL, "AMCE endpoint URL.")
+	flag.IntVar(&syncInterval, "sync-interval", syncInterval, "Sync interval in seconds.")
 	flag.Parse()
 
 	log.Println("Starting Kubernetes Certificate Controller...")
@@ -38,7 +40,7 @@ func main() {
 	}
 	log.Println("Kubernetes Certificate Controller started successfully.")
 
-	// Process all certificates.
+	// Process all Certificates definitions during the startup process.
 	log.Println("Processing all certificates...")
 	var certificates []Certificate
 	for {
@@ -59,10 +61,17 @@ func main() {
 		}
 	}
 
-	// Watch for certificate events.
+	// Watch for events that add, modify, or delete Certificate definitions and
+	// process them asynchronously.
 	log.Println("Watching for certificate changes...")
 	events, errs := watchCertificateEvents()
-	syncErrs := syncCertificates(db)
+
+	// Start the certificate reconciler that will ensure all Certificate
+	// definitions are backed by a LetsEncrypt certificate and a Kubernetes
+	// TLS secret.
+	log.Println("Starting reconciliation loop...")
+	syncErrs := syncCertificates(syncInterval, db)
+
 	for {
 		select {
 		case event := <-events:
