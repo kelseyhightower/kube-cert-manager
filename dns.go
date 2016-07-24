@@ -142,6 +142,7 @@ func (c *GoogleDNSClient) DeleteDNSRecord(fqdn string) error {
 }
 
 func waitDNS(fqdn, value string, ttl int) error {
+	// Add a timeout so we don't block forever.
 	dnsClient := new(dns.Client)
 	dnsClient.Net = "tcp"
 	dnsClient.Timeout = time.Second * 10
@@ -153,10 +154,8 @@ func waitDNS(fqdn, value string, ttl int) error {
 		m.RecursionDesired = false
 
 		nameservers := []string{
-			"ns-cloud-c1.googledomains.com:53",
-			"ns-cloud-c2.googledomains.com:53",
-			"ns-cloud-c3.googledomains.com:53",
-			"ns-cloud-c4.googledomains.com:53",
+			"8.8.8.8:53",
+			"8.8.4.4:53",
 		}
 
 		for _, ns := range nameservers {
@@ -165,8 +164,15 @@ func waitDNS(fqdn, value string, ttl int) error {
 				in, _, err := dnsClient.Exchange(m, ns)
 				if err != nil {
 					log.Println(err)
-					time.Sleep(3 * time.Second)
+					time.Sleep(5 * time.Second)
+					continue
 				}
+
+				if len(in.Answer) == 0 {
+					time.Sleep(5 * time.Second)
+					continue
+				}
+
 				for _, rr := range in.Answer {
 					if txt, ok := rr.(*dns.TXT); ok {
 						if strings.Join(txt.Txt, "") == value {

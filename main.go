@@ -4,6 +4,8 @@ import (
 	"flag"
 	"fmt"
 	"log"
+	"net/http"
+	_ "net/http/pprof"
 	"path"
 	"time"
 
@@ -23,6 +25,11 @@ func main() {
 	flag.Parse()
 
 	log.Println("Starting Kubernetes Certificate Controller...")
+
+	go func() {
+		log.Println(http.ListenAndServe("127.0.0.1:6060", nil))
+	}()
+
 	db, err := bolt.Open(path.Join(dataDir, "data.db"), 0600, nil)
 	if err != nil {
 		log.Fatal(err)
