@@ -252,6 +252,13 @@ func saveAccount(account *Account, db *bolt.DB) error {
 	return err
 }
 
+func deleteAccount(email string, db *bolt.DB) error {
+	err := db.Update(func(tx *bolt.Tx) error {
+		return tx.Bucket([]byte("Accounts")).Delete([]byte(email))
+	})
+	return err
+}
+
 func getEndpoint(url string) (acme.Endpoint, error) {
 	certPool, err := gocertifi.CACerts()
 	if err != nil {

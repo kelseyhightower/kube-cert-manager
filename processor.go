@@ -16,7 +16,7 @@ func syncCertificates(interval int, db *bolt.DB) <-chan error {
 	go func() {
 		for {
 			var err error
-			time.Sleep(interval * time.Second)
+			time.Sleep(time.Duration(interval) * time.Second)
 			var certificates []Certificate
 			for {
 				certificates, err = getCertificates()
@@ -44,9 +44,18 @@ func processCertificateEvent(c CertificateEvent, db *bolt.DB) error {
 	case c.Type == "ADDED":
 		return processCertificate(c.Object, db)
 	case c.Type == "DELETED":
-		log.Println("Deleting certificate...")
+		return deleteCertificate(c.Object, db)
 	}
 	return nil
+}
+
+func deleteCertificate(c Certificate, db *bolt.DB) error {
+	log.Printf("Deleting %s certificate...", c.Spec.Email)
+	err := deleteAccount(c.Spec.Email, db)
+	if err != nil {
+		return errors.New("Error deleting account" + err.Error())
+	}
+	return deleteKubernetesSecret(c.Spec.Email)
 }
 
 func processCertificate(c Certificate, db *bolt.DB) error {

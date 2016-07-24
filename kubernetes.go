@@ -5,6 +5,7 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -134,6 +135,21 @@ func checkSecret(name string) (bool, error) {
 		return false, nil
 	}
 	return true, nil
+}
+
+func deleteKubernetesSecret(domain string) error {
+	req, err := http.NewRequest("DELETE", apiHost+secretsEndpoint+"/"+domain, nil)
+	if err != nil {
+		return err
+	}
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return err
+	}
+	if resp.StatusCode != 200 {
+		return fmt.Errorf("Deleting %s secret failed: %s", domain, resp.Status)
+	}
+	return nil
 }
 
 func syncKubernetesSecret(domain string, cert, key []byte) error {
