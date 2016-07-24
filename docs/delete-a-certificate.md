@@ -25,7 +25,7 @@ Logs from the `kube-cert-manager`:
 Submitting a previously deleted Certificate configuration to the Kubernetes API server will cause the `kube-cert-manager` to reuse the existing Let's Encrypt account associated with the email address defined for the certificate. If a valid Let's Encrypt issued certificate is available it will be downloaded and used when recreating the Kubernetes TLS secret.
 
 ```
-kubectl create -f certificates/hightowerlabs-com.yaml
+kubectl create -f kubernetes/certificates/hightowerlabs-com.yaml
 ```
 ```
 certificate "hightowerlabs-dot-com" created
