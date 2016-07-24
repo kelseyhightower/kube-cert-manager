@@ -34,19 +34,25 @@ versions:
 kubectl create -f extensions/certificate.yaml 
 ```
 
-### Run kube-cert-manager
+### Create the Kubernetes Certificate Manager Deployment
+
+Create a persistent disk which will store the `kube-cert-manager` [bolt database](https://github.com/boltdb/bolt).
 
 ```
-gcloud compute disks create kube-cert-manager
+gcloud compute disks create kube-cert-manager --size 10GB
 ```
+
+> 10GB is the minimal disk size for a Google Compute Engine persistent disk.
 
 ```
 kubectl create -f deployments/kube-cert-manager.yaml 
+```
+```
 deployment "kube-cert-manager" created
 ```
 
 ```
-kubectl logs kube-cert-manager-2924908400-ua73z kube-cert-manager -f
+kubectl logs kube-cert-manager-2924908400-ua73z kube-cert-manager
 ```
 
 ```
@@ -60,6 +66,8 @@ kubectl logs kube-cert-manager-2924908400-ua73z kube-cert-manager -f
 ### Create a Certificate
 
 #### Create A Google Cloud Service Account Secret
+
+The `kube-cert-manager` requires a service account with access to the Google DNS API. The service account must be stored in a Kubernetes secret that can be retrieved by the `kube-cert-manager` at runtime.
 
 ```
 kubectl create secret generic hightowerlabs \
@@ -97,6 +105,8 @@ spec:
   project: "hightowerlabs"
   serviceAccount: "hightowerlabs"
 ```
+
+> The `spec.serviceAccount` value must match the name of a Kubernetes secret that holds a Google service account.
 
 ```
 kubectl create -f certificates/hightowerlabs-com.yaml
