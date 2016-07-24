@@ -13,11 +13,11 @@ import (
 
 func syncCertificates(db *bolt.DB) <-chan error {
 	errc := make(chan error, 1)
+	log.Println("Starting reconciliation loop...")
 	go func() {
 		for {
 			var err error
 			time.Sleep(30 * time.Second)
-			log.Println("Starting reconciliation loop...")
 			var certificates []Certificate
 			for {
 				certificates, err = getCertificates()
@@ -29,14 +29,12 @@ func syncCertificates(db *bolt.DB) <-chan error {
 				break
 			}
 			for _, cert := range certificates {
-				log.Printf("Processing certificate: %s", cert.Metadata["name"])
 				err := processCertificate(cert, db)
 				if err != nil {
 					errc <- err
 					continue
 				}
 			}
-			log.Println("Reconciliation loop complete.")
 		}
 	}()
 	return errc
@@ -53,14 +51,13 @@ func processCertificateEvent(c CertificateEvent, db *bolt.DB) error {
 }
 
 func processCertificate(c Certificate, db *bolt.DB) error {
-	log.Println("Looking up ACME account using:", c.Spec.Email)
 	account, err := findAccount(c.Spec.Email, db)
 	if err != nil {
 		return err
 	}
 
 	if account == nil {
-		log.Printf("ACME account for %s not found. Creating new account...", c.Spec.Email)
+		log.Printf("ACME account for %s not found. Creating new account.", c.Spec.Email)
 		account, err = newAccount(c.Spec.Email)
 		if err != nil {
 			return err
@@ -90,7 +87,7 @@ func processCertificate(c Certificate, db *bolt.DB) error {
 	}
 
 	if account.CertificateURL != "" {
-		log.Printf("Renewing certificate for %s...", c.Spec.Domain)
+		log.Printf("Fetching existing certificate for %s.", c.Spec.Domain)
 		cert, err := acmeClient.RenewCert(account.CertificateURL)
 		if err != nil {
 			return errors.New("Error renewing certificate" + err.Error())
