@@ -50,12 +50,8 @@ func processCertificateEvent(c CertificateEvent, db *bolt.DB) error {
 }
 
 func deleteCertificate(c Certificate, db *bolt.DB) error {
-	log.Printf("Deleting %s certificate...", c.Spec.Email)
-	err := deleteAccount(c.Spec.Email, db)
-	if err != nil {
-		return errors.New("Error deleting account" + err.Error())
-	}
-	return deleteKubernetesSecret(c.Spec.Email)
+	log.Printf("Deleting %s certificate...", c.Spec.Domain)
+	return deleteKubernetesSecret(c.Spec.Domain)
 }
 
 func processCertificate(c Certificate, db *bolt.DB) error {
