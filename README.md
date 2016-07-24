@@ -24,7 +24,7 @@ The `kube-cert-manager` requires a [Google Cloud DNS](https://cloud.google.com/d
 
 ### Create the Certificate ThirdParty Resource
 
-The `kube-cert-manager` is driven by Kubernetes certificate objects. Certificates are not a core Kubernetes kind, but can be defined using the following `ThirdPartyResource`:
+The `kube-cert-manager` is driven by Kubernetes Certificate objects. Certificates are not a core Kubernetes kind, but can be defined using the following `ThirdPartyResource`:
 
 ```
 apiVersion: extensions/v1beta1
@@ -45,7 +45,7 @@ kubectl create -f extensions/certificate.yaml
 ### Create the Kubernetes Certificate Manager Deployment
 
 Create a persistent disk which will store the `kube-cert-manager` database.
-> [boltdb](https://github.com/boltdb/bolt) is used persistent data.
+> [boltdb](https://github.com/boltdb/bolt) is used to persistent data.
 
 ```
 gcloud compute disks create kube-cert-manager --size 10GB
