@@ -1,16 +1,20 @@
 # Kubernetes Certificate Manager
 
-Status: Almost working prototype
-
 This is not an official Google Project.
 
-`kube-cert-manager` is currently a prototype with the following features:
+The `kube-cert-manager` supports the following features:
 
-* Manage Lets Encrypt certificates based on a ThirdParty `certificate` resource.
-* Will only ever support the dns-01 challenge for Google Cloud DNS. (For now)
+* Manage Lets Encrypt certificates based on a ThirdParty `certificate` resources.
+* Supports the ACME [dns-01 challenge](https://letsencrypt.github.io/acme-spec/#rfc.section.7.4) for domain validation. (Google Cloud DNS)
 * Saves Lets Encrypt certificates as Kubernetes secrets.
 
-This repository will also include a end-to-end tutorial on how to dynamically load TLS certificates.
+## Project Goals
+
+* Demonstrate how to build custom Kubernetes controllers.
+* Demonstrate how to use Kubernetes [Third Party Resources](https://github.com/kubernetes/kubernetes/blob/release-1.3/docs/design/extending-api.md).
+* Demonstrate how interact with the Kubernetes API (watches, reconciliation, etc)
+* Demonstrate how to write great documentation for Kubernetes add-ons and extensions.
+* Promote the usage of LetsEncrypt for securing web application endpoints.
 
 ## Requirements
 
@@ -18,7 +22,9 @@ The `kube-cert-manager` requires a [Google Cloud DNS](https://cloud.google.com/d
 
 ## Usage
 
-### Add the Certificate ThirdParty resource
+### Create the Certificate ThirdParty Resource
+
+The `kube-cert-manager` is driven by Kubernetes certificate objects. Certificates are not a core Kubernetes kind, but can be defined using the following `ThirdPartyResource`:
 
 ```
 apiVersion: extensions/v1beta1
@@ -30,13 +36,16 @@ versions:
   - name: v1
 ```
 
+Create the Certificate Third Party Resource:
+
 ```
 kubectl create -f extensions/certificate.yaml 
 ```
 
 ### Create the Kubernetes Certificate Manager Deployment
 
-Create a persistent disk which will store the `kube-cert-manager` [bolt database](https://github.com/boltdb/bolt).
+Create a persistent disk which will store the `kube-cert-manager` database.
+> [boltdb](https://github.com/boltdb/bolt) is used persistent data.
 
 ```
 gcloud compute disks create kube-cert-manager --size 10GB
@@ -44,12 +53,16 @@ gcloud compute disks create kube-cert-manager --size 10GB
 
 > 10GB is the minimal disk size for a Google Compute Engine persistent disk.
 
+Create the `kube-cert-manager` deployment:
+
 ```
 kubectl create -f deployments/kube-cert-manager.yaml 
 ```
 ```
 deployment "kube-cert-manager" created
 ```
+
+Review the `kube-cert-manager` logs:
 
 ```
 kubectl logs kube-cert-manager-2924908400-ua73z kube-cert-manager
@@ -64,6 +77,8 @@ kubectl logs kube-cert-manager-2924908400-ua73z kube-cert-manager
 ```
 
 ### Create a Certificate
+
+LetsEncrypt certificates are automatically created for each Kubernetes Certificate object.
 
 #### Create A Google Cloud Service Account Secret
 
@@ -92,7 +107,11 @@ Data
 service-account.json:   3915 bytes
 ```
 
-#### Create a Certificate Object
+#### Create a Kubernetes Certificate Object
+
+```
+cat certificates/hightowerlabs-com.yaml
+```
 
 ```
 apiVersion: "stable.hightower.com/v1"
@@ -116,7 +135,7 @@ kubectl create -f certificates/hightowerlabs-com.yaml
 certificate "hightowerlabs-dot-com" created
 ```
 
-After submitting the certificate configuration to the Kubernetes API it will be processed by the `kube-cert-manager`:
+After submitting the Certificate configuration to the Kubernetes API it will be processed by the `kube-cert-manager`:
 
 Logs from the `kube-cert-manager`:
 
