@@ -6,7 +6,7 @@ This is not an official Google Project.
 
 * Manage [Let's Encrypt](https://letsencrypt.org) issued certificates based on Kubernetes ThirdParty Resources.
 * Domain validation using ACME [dns-01 challenges](https://letsencrypt.github.io/acme-spec/#rfc.section.7.4).
-* Saves Let's Encrypt issued certificates as Kubernetes TLS secrets.
+* Kubernetes TLS secrets backed by Let's Encrypt issued certificates.
 
 ## Project Goals
 
