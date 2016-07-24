@@ -4,17 +4,17 @@ This is not an official Google Project.
 
 The `kube-cert-manager` supports the following features:
 
-* Manage [Let's Encrypt](https://letsencrypt.org) certificates based on Kubernetes ThirdParty Resources
-* Domain validation using ACME [dns-01 challenges](https://letsencrypt.github.io/acme-spec/#rfc.section.7.4)
-* Saves Let's Encrypt issued certificates as Kubernetes TLS secrets
+* Manage [Let's Encrypt](https://letsencrypt.org) certificates based on Kubernetes ThirdParty Resources.
+* Domain validation using ACME [dns-01 challenges](https://letsencrypt.github.io/acme-spec/#rfc.section.7.4).
+* Saves Let's Encrypt issued certificates as Kubernetes TLS secrets.
 
 ## Project Goals
 
 * Demonstrate how to build custom Kubernetes controllers.
 * Demonstrate how to use Kubernetes [Third Party Resources](https://github.com/kubernetes/kubernetes/blob/release-1.3/docs/design/extending-api.md).
-* Demonstrate how interact with the Kubernetes API (watches, reconciliation, etc)
+* Demonstrate how interact with the Kubernetes API (watches, reconciliation, etc).
 * Demonstrate how to write great documentation for Kubernetes add-ons and extensions.
-* Promote the usage of LetsEncrypt for securing web application endpoints.
+* Promote the usage of Let's Encrypt for securing web application running on Kubernetes.
 
 ## Requirements
 
@@ -78,7 +78,7 @@ kubectl logs kube-cert-manager-2924908400-ua73z kube-cert-manager
 
 ### Create a Certificate
 
-LetsEncrypt certificates are automatically created for each Kubernetes Certificate object.
+Let's Encrypt issued certificates are automatically created for each Kubernetes Certificate object.
 
 #### Create A Google Cloud Service Account Secret
 
@@ -86,7 +86,7 @@ The `kube-cert-manager` requires a service account with access to the Google DNS
 
 ```
 kubectl create secret generic hightowerlabs \
-  --from-file=/Users/khightower/Desktop/service-account.json
+  --from-file=service-account.json
 ```
 
 > The secret key must be named `service-account.json`
@@ -178,7 +178,7 @@ tls.key:     1679 bytes
 
 ### Deleting a Certificate
 
-Deleting a certificate object will cause the `kube-cert-manager` to delete the Kubernetes TLS secret holding the LetsEncrypt certificate and private key.
+Deleting a certificate object will cause the `kube-cert-manager` to delete the Kubernetes TLS secret holding the Let's Encrypt certificate and private key.
 
 ```
 kubectl delete certificates hightowerlabs-dot-com
@@ -194,11 +194,11 @@ Logs from the `kube-cert-manager`:
 2016/07/24 14:54:26 Deleting hightowerlabs.com certificate...
 ```
 
-> Note: The LetsEncrypt user account is not deleted from the `kube-cert-manager` internal database to prevent hitting LetsEncrypt rate limits on account registrations. Accounts can also be used by multiple certificates so we keep them around even if the account is not being used.
+> Note: The Let's Encrypt user account is not deleted from the `kube-cert-manager` internal database to prevent hitting rate limits on account registrations. User accounts can also be used by multiple certificates so we keep them around even if the account is not in use.
 
 ### Recreating a Certificate
 
-Submitting a previously deleted Certificate configuration to the Kubernetes API server will cause the `kube-cert-manager` to reuse the existing LetsEncrypt account associated with the email address defined for the certificate. If a valid LetsEncrypt certificate is available it will be downloaded and used when recreating the Kubernetes TLS secret.
+Submitting a previously deleted Certificate configuration to the Kubernetes API server will cause the `kube-cert-manager` to reuse the existing Let's Encrypt account associated with the email address defined for the certificate. If a valid Let's Encrypt issued certificate is available it will be downloaded and used when recreating the Kubernetes TLS secret.
 
 ```
 kubectl create -f certificates/hightowerlabs-com.yaml
