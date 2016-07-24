@@ -4,9 +4,9 @@ This is not an official Google Project.
 
 The `kube-cert-manager` supports the following features:
 
-* Manage Lets Encrypt certificates based on a ThirdParty `certificate` resources.
-* Supports the ACME [dns-01 challenge](https://letsencrypt.github.io/acme-spec/#rfc.section.7.4) for domain validation. (Google Cloud DNS)
-* Saves Lets Encrypt certificates as Kubernetes secrets.
+* Manage [Let's Encrypt](https://letsencrypt.org) certificates based on Kubernetes ThirdParty Resources.
+* Domain validation using ACME [dns-01 challenges](https://letsencrypt.github.io/acme-spec/#rfc.section.7.4)
+* Saves Let's Encrypt issued certificates as Kubernetes TLS secrets.
 
 ## Project Goals
 
@@ -196,9 +196,9 @@ Logs from the `kube-cert-manager`:
 
 > Note: The LetsEncrypt user account is not deleted from the `kube-cert-manager` internal database to prevent hitting LetsEncrypt rate limits on account registrations. Accounts can also be used by multiple certificates so we keep them around even if the account is not being used.
 
-#### Recreating a Certificate
+### Recreating a Certificate
 
-Submitting the previously deleted certificate configuration to the Kubernetes API server will cause the `kube-cert-manager` to reuse the existing LetsEncrypt account associated with the email address defined for the certificate. If a valid LetsEncrypt certificate is available it will be downloaded and used when recreating the Kubernetes TLS secret.
+Submitting a previously deleted Certificate configuration to the Kubernetes API server will cause the `kube-cert-manager` to reuse the existing LetsEncrypt account associated with the email address defined for the certificate. If a valid LetsEncrypt certificate is available it will be downloaded and used when recreating the Kubernetes TLS secret.
 
 ```
 kubectl create -f certificates/hightowerlabs-com.yaml
@@ -216,7 +216,7 @@ Logs from the `kube-cert-manager`:
 ```
 
 ```
-$ kubectl get secrets
+kubectl get secrets
 ```
 ```
 NAME                  TYPE                                  DATA      AGE
