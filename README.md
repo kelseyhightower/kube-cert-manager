@@ -93,16 +93,23 @@ kubectl logs kube-cert-manager-2924908400-ua73z kube-cert-manager -f
 ```
 
 ```
-2016/07/19 11:24:43 [INFO] acme: Registering account for kelsey.hightower@gmail.com
-2016/07/19 11:24:46 [INFO][hightowerlabs.com] acme: Obtaining SAN certificate
-2016/07/19 11:24:50 [INFO][hightowerlabs.com] acme: Could not find solver for: http-01
-2016/07/19 11:24:50 [INFO][hightowerlabs.com] acme: Could not find solver for: tls-sni-01
-2016/07/19 11:24:50 [INFO][hightowerlabs.com] acme: Trying to solve DNS-01
-2016/07/19 11:24:56 [INFO][hightowerlabs.com] Checking DNS record propagation...
-2016/07/19 11:25:56 [INFO][hightowerlabs.com] The server validated our request
-2016/07/19 11:25:59 [INFO][hightowerlabs.com] acme: Validations succeeded; requesting certificates
-2016/07/19 11:26:01 [INFO][hightowerlabs.com] Server responded with a certificate.
-2016/07/19 15:49:48 hightowerlabs.com secret already exists skipping...
+2016/07/24 03:56:12 Starting Kubernetes Certificate Controller...
+2016/07/24 03:56:12 Kubernetes Certificate Controller started successfully.
+2016/07/24 03:56:12 Processing all certificates...
+2016/07/24 03:56:12 Get http://127.0.0.1:8001/apis/stable.hightower.com/v1/namespaces/default/certificates: dial tcp 127.0.0.1:8001: getsockopt: connection refused
+2016/07/24 03:56:17 Processing certificate: hightowerlabs-dot-com
+2016/07/24 03:56:17 Looking up ACME account using: kelsey.hightower@gmail.com
+2016/07/24 03:56:17 Renewing certificate for hightowerlabs.com...
+2016/07/24 03:56:17 Secret [%s] not found. Creating... hightowerlabs.com
+2016/07/24 03:56:17 Watching for certificate changes...
+2016/07/24 03:56:18 Processing certificate event for hightowerlabs-dot-com
+2016/07/24 03:56:18 Looking up ACME account using: kelsey.hightower@gmail.com
+2016/07/24 03:56:18 Renewing certificate for hightowerlabs.com...
+2016/07/24 03:56:47 Starting reconciliation loop...
+2016/07/24 03:56:47 Processing certificate: hightowerlabs-dot-com
+2016/07/24 03:56:47 Looking up ACME account using: kelsey.hightower@gmail.com
+2016/07/24 03:56:48 Renewing certificate for hightowerlabs.com...
+2016/07/24 03:56:48 Reconciliation loop complete.
 ```
 
 #### Results
