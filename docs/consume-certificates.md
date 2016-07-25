@@ -34,7 +34,7 @@ spec:
         secretName: hightowerlabs.com
 ```
 
-The key to consuming Kubernetes TLS secrets is to use a secret volume. Study the snippet above and notice how the `hightowerlabs.com` secret is being mounted under the /etc/tls directory. By default the Kubernetes Certificate Manager will store all certificates and privates key using the `tls.crt` and `tls.key` key names. This will result in two files under the /etc/tls directory at runtime.
+The key to consuming Kubernetes TLS secrets is to use a secret volume. Study the snippet above and notice how the `hightowerlabs.com` secret is being mounted under the `/etc/tls` directory. By default the Kubernetes Certificate Manager will store all certificates and privates key using the `tls.crt` and `tls.key` key names. This will result in two files under the `/etc/tls` directory at runtime.
 
 Use kubectl to create the `dynamic-certs` deployment:
 
