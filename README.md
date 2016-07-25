@@ -26,6 +26,7 @@ This is not an official Google Project.
 * [Deployment Guide](docs/deployment-guide.md)
 * [Creating a Certificate](docs/create-a-certificate.md)
 * [Deleting a Certificate](docs/delete-a-certificate.md)
+* [Consuming Certificates](docs/consume-certificates.md)
 
 ## Documentation
 
