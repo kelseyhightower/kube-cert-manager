@@ -3,18 +3,15 @@ package main
 import (
 	"context"
 	"crypto/sha256"
-	"crypto/tls"
 	"encoding/base64"
 	"errors"
 	"fmt"
 	"log"
 	"net"
-	"net/http"
 	"strings"
 	"sync"
 	"time"
 
-	"github.com/certifi/gocertifi"
 	"github.com/miekg/dns"
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/google"
@@ -34,18 +31,6 @@ func NewGoogleDNSClient(serviceAccount []byte, project, domain string) (*GoogleD
 	)
 	if err != nil {
 		return nil, err
-	}
-
-	certPool, err := gocertifi.CACerts()
-	if err != nil {
-		return nil, err
-	}
-
-	httpClient := http.Client{
-		Timeout: 10 * time.Second,
-		Transport: &http.Transport{
-			TLSClientConfig: &tls.Config{RootCAs: certPool},
-		},
 	}
 
 	ctx := context.WithValue(context.Background(), oauth2.HTTPClient, &httpClient)

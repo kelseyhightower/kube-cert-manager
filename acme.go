@@ -4,18 +4,15 @@ import (
 	"bytes"
 	"crypto/rand"
 	"crypto/rsa"
-	"crypto/tls"
 	"crypto/x509"
 	"crypto/x509/pkix"
 	"encoding/gob"
 	"encoding/pem"
 	"errors"
 	"fmt"
-	"net/http"
 	"time"
 
 	"github.com/boltdb/bolt"
-	"github.com/certifi/gocertifi"
 	"github.com/google/acme"
 )
 
@@ -44,18 +41,6 @@ type ACMEClient struct {
 }
 
 func newACMEClient(discoveryURL string, key *rsa.PrivateKey) (*ACMEClient, error) {
-	certPool, err := gocertifi.CACerts()
-	if err != nil {
-		return nil, err
-	}
-
-	httpClient := http.Client{
-		Timeout: 10 * time.Second,
-		Transport: &http.Transport{
-			TLSClientConfig: &tls.Config{RootCAs: certPool},
-		},
-	}
-
 	endpoint, err := getEndpoint(discoveryURL)
 	if err != nil {
 		return nil, err
@@ -129,18 +114,6 @@ func (c *ACMEClient) CreateCert(domain string, key *rsa.PrivateKey) ([]byte, str
 		return nil, "", err
 	}
 
-	certPool, err := gocertifi.CACerts()
-	if err != nil {
-		return nil, "", err
-	}
-
-	httpClient := http.Client{
-		Timeout: 10 * time.Second,
-		Transport: &http.Transport{
-			TLSClientConfig: &tls.Config{RootCAs: certPool},
-		},
-	}
-
 	if cert == nil {
 		for {
 			cert, err = acme.FetchCert(&httpClient, certURL, certBundle)
@@ -165,18 +138,6 @@ func (c *ACMEClient) CreateCert(domain string, key *rsa.PrivateKey) ([]byte, str
 }
 
 func (c *ACMEClient) RenewCert(certURL string) ([]byte, error) {
-	certPool, err := gocertifi.CACerts()
-	if err != nil {
-		return nil, err
-	}
-
-	httpClient := http.Client{
-		Timeout: 10 * time.Second,
-		Transport: &http.Transport{
-			TLSClientConfig: &tls.Config{RootCAs: certPool},
-		},
-	}
-
 	cert, err := acme.FetchCert(&httpClient, certURL, certBundle)
 	if err != nil {
 		return nil, err
@@ -262,17 +223,5 @@ func deleteAccount(domain string, db *bolt.DB) error {
 }
 
 func getEndpoint(url string) (acme.Endpoint, error) {
-	certPool, err := gocertifi.CACerts()
-	if err != nil {
-		return acme.Endpoint{}, err
-	}
-
-	httpClient := http.Client{
-		Timeout: 10 * time.Second,
-		Transport: &http.Transport{
-			TLSClientConfig: &tls.Config{RootCAs: certPool},
-		},
-	}
-
 	return acme.Discover(&httpClient, url)
 }
