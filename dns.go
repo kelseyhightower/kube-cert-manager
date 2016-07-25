@@ -187,6 +187,9 @@ func (c *GoogleDNSClient) monitorDNSPropagation(fqdn, value string, ttl int) err
 
 	select {
 	case <-done:
+		// Wait until the TTL expires to be sure Let's Encrypt picks up the
+		// right TXT record.
+		time.Sleep(time.Duration(ttl * time.Second))
 		log.Printf("%s DNS propagation complete.", fqdn)
 		return nil
 	case <-time.After(300 * time.Second):
