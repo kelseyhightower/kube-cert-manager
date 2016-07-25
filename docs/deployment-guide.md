@@ -2,6 +2,8 @@
 
 This guide will walk you through deploying the Kubernetes Certificate Manager.
 
+By default `kube-cert-manager` obtains certificates from the Let's Encrypt staging environment. Set the `-amce-url` flag to `https://acme-v01.api.letsencrypt.org/directory` for production.
+
 ## High Level Tasks
 
 * Create the Certificate Third Party Resource
