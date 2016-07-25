@@ -54,9 +54,16 @@ type Secret struct {
 }
 
 func getCertificates() ([]Certificate, error) {
-	resp, err := http.Get(apiHost + certificatesEndpoint)
-	if err != nil {
-		return nil, err
+	var resp *http.Response
+	var err error
+	for {
+		resp, err = http.Get(apiHost + certificatesEndpoint)
+		if err != nil {
+			log.Println(err)
+			time.Sleep(5 * time.Second)
+			continue
+		}
+		break
 	}
 
 	var certList CertificateList
@@ -186,7 +193,7 @@ func syncKubernetesSecret(domain string, cert, key []byte) error {
 			return err
 		}
 		if currentSecret.Data["tls.crt"] != secret.Data["tls.crt"] || currentSecret.Data["tls.key"] != secret.Data["tls.key"] {
-			log.Printf("Secret [%s] out of sync.", domain)
+			log.Printf("%s secret out of sync.", domain)
 			currentSecret.Data = secret.Data
 			b := make([]byte, 0)
 			body := bytes.NewBuffer(b)
@@ -206,13 +213,13 @@ func syncKubernetesSecret(domain string, cert, key []byte) error {
 			if resp.StatusCode != 200 {
 				return errors.New("Updating secret failed:" + resp.Status)
 			}
-			log.Printf("Syncing secret [%s] complete.", domain)
+			log.Printf("Syncing %s secret complete.", domain)
 		}
 		return nil
 	}
 
 	if resp.StatusCode == 404 {
-		log.Printf("Secret [%s] not found. Creating...", domain)
+		log.Printf("%s secret missing.", domain)
 		b := make([]byte, 0)
 		body := bytes.NewBuffer(b)
 		err := json.NewEncoder(body).Encode(secret)
@@ -227,6 +234,7 @@ func syncKubernetesSecret(domain string, cert, key []byte) error {
 		if resp.StatusCode != 201 {
 			return errors.New("Secrets: Unexpected HTTP status code" + resp.Status)
 		}
+		log.Printf("%s secret created.", domain)
 		return nil
 	}
 	return nil
