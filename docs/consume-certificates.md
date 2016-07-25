@@ -58,6 +58,26 @@ kubectl logs dynamic-certs-1623907102-wg95k
 2016/07/25 14:15:53 Watching for TLS certificate changes...
 ```
 
+#### Verify
+
+```
+kubectl port-forward dynamic-certs-1623907102-wg95k 10443:443
+```
+```
+Forwarding from 127.0.0.1:10443 -> 443
+Forwarding from [::1]:10443 -> 443
+```
+
+In another terminal grab the serial number of the current certificate:
+
+```
+openssl s_client -showcerts -connect 127.0.0.1:10443 2>&1 \
+  | openssl x509 -noout -serial
+```
+```
+serial=FA37E39A3368C72EF6F6E5FC4C9F3FA7BC26
+```
+
 ### Getting a New Certificate
 
 An easy way to force the Kubernetes Certificate Manager to generate a new Let's Encrypt issued certificate is to delete the `hightowerlabs-dot-com` certificate object:
@@ -125,4 +145,24 @@ kubectl logs dynamic-certs-1623907102-wg95k -f
 2016/07/25 14:22:30 Reloading TLS certificates...
 2016/07/25 14:22:30 Loading TLS certificates...
 2016/07/25 14:22:30 Reloading TLS certificates complete.
+```
+
+#### Verify
+
+```
+kubectl port-forward dynamic-certs-1623907102-wg95k 10443:443
+```
+```
+Forwarding from 127.0.0.1:10443 -> 443
+Forwarding from [::1]:10443 -> 443
+```
+
+In another terminal grab the serial number of the current certificate:
+
+```
+openssl s_client -showcerts -connect 127.0.0.1:10443 2>&1 \
+  | openssl x509 -noout -serial
+```
+```
+serial=FA7B2541F66889134DFAE8E2A4DD8DAE2345
 ```
