@@ -17,7 +17,7 @@ certificate "hightowerlabs-dot-com" deleted
 Logs from the `kube-cert-manager`:
 
 ```
-2016/07/24 14:54:26 Processing certificate event for hightowerlabs-dot-com
-2016/07/24 14:54:26 Deleting Let's Encrypt account: hightowerlabs.com
-2016/07/24 14:54:26 Deleting Kubernetes TLS secret: hightowerlabs.com
+2016/07/25 06:42:03 Processing certificate event: hightowerlabs-dot-com
+2016/07/25 06:42:03 Deleting Let's Encrypt account: hightowerlabs.com
+2016/07/25 06:42:03 Deleting Kubernetes TLS secret: hightowerlabs.com
 ```
