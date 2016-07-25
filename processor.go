@@ -31,12 +31,10 @@ func reconcileCertificates(interval int, db *bolt.DB) <-chan error {
 	go func() {
 		for {
 			time.Sleep(time.Duration(interval) * time.Second)
-			log.Println("Reconciler: reconciling certificates...")
 			err := syncCertificates(db)
 			if err != nil {
 				errc <- err
 			}
-			log.Println("Reconciler: reconciling certificates complete.")
 		}
 	}()
 	return errc
