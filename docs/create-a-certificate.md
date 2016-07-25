@@ -32,7 +32,7 @@ service-account.json:   3915 bytes
 ## Create a Kubernetes Certificate Object
 
 ```
-cat certificates/hightowerlabs-com.yaml
+cat kubernetes/certificates/hightowerlabs-com.yaml
 ```
 
 ```
@@ -50,7 +50,7 @@ spec:
 > The `spec.serviceAccount` value must match the name of a Kubernetes secret that holds a Google service account.
 
 ```
-kubectl create -f certificates/hightowerlabs-com.yaml
+kubectl create -f kubernetes/certificates/hightowerlabs-com.yaml
 ```
 
 ```
