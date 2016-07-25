@@ -91,6 +91,8 @@ certificate "hightowerlabs-dot-com" created
 
 This will cause the `kube-cert-manager` to create a new Let's Encrypt user account and aquire a new certificate.
 
+Review the `kube-cert-manager` logs:
+
 ```
 kubectl logs kube-cert-manager-1999323568-npjf5 kube-cert-manager -f
 ```
@@ -108,6 +110,8 @@ kubectl logs kube-cert-manager-1999323568-npjf5 kube-cert-manager -f
 ```
 
 After a few minutes the `dynamic-certs` application will pickup and reload the new TLS certificates.
+
+Review the `dynamic-certs` logs:
 
 ```
 kubectl logs dynamic-certs-1623907102-wg95k -f
