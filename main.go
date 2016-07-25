@@ -16,7 +16,11 @@ import (
 	"log"
 	"net/http"
 	_ "net/http/pprof"
+	"os"
+	"os/signal"
 	"path"
+	"sync"
+	"syscall"
 
 	"github.com/boltdb/bolt"
 )
@@ -62,23 +66,31 @@ func main() {
 		log.Println(err)
 	}
 
+	doneChan := make(chan struct{})
+	var wg sync.WaitGroup
+
 	// Watch for events that add, modify, or delete Certificate definitions and
 	// process them asynchronously.
 	log.Println("Watching for certificate events.")
-	watchErrs := watchCertificateEvents(db)
+	wg.Add(1)
+	watchCertificateEvents(db, doneChan, &wg)
 
 	// Start the certificate reconciler that will ensure all Certificate
 	// definitions are backed by a LetsEncrypt certificate and a Kubernetes
 	// TLS secret.
 	log.Println("Starting reconciliation loop.")
-	reconcileErrs := reconcileCertificates(syncInterval, db)
+	wg.Add(1)
+	reconcileCertificates(syncInterval, db, doneChan, &wg)
 
+	signalChan := make(chan os.Signal, 1)
+	signal.Notify(signalChan, syscall.SIGINT, syscall.SIGTERM)
 	for {
 		select {
-		case err := <-watchErrs:
-			log.Println(err)
-		case err := <-reconcileErrs:
-			log.Println(err)
+		case <-signalChan:
+			log.Printf("Shutdown signal received, exiting...")
+			close(doneChan)
+			wg.Wait()
+			os.Exit(0)
 		}
 	}
 }

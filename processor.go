@@ -26,18 +26,43 @@ import (
 // event processing does not happen at the same time.
 var processorLock = &sync.Mutex{}
 
-func reconcileCertificates(interval int, db *bolt.DB) <-chan error {
-	errc := make(chan error, 1)
+func reconcileCertificates(interval int, db *bolt.DB, done chan struct{}, wg *sync.WaitGroup) {
 	go func() {
 		for {
-			time.Sleep(time.Duration(interval) * time.Second)
-			err := syncCertificates(db)
-			if err != nil {
-				errc <- err
+			select {
+			case <-time.After(time.Duration(interval) * time.Second):
+				err := syncCertificates(db)
+				if err != nil {
+					log.Println(err)
+				}
+			case <-done:
+				wg.Done()
+				log.Println("Stopped reconciliation loop.")
+				return
 			}
 		}
 	}()
-	return errc
+}
+
+func watchCertificateEvents(db *bolt.DB, done chan struct{}, wg *sync.WaitGroup) {
+	events, watchErrs := monitorCertificateEvents()
+	go func() {
+		for {
+			select {
+			case event := <-events:
+				err := processCertificateEvent(event, db)
+				if err != nil {
+					log.Println(err)
+				}
+			case err := <-watchErrs:
+				log.Println(err)
+			case <-done:
+				wg.Done()
+				log.Println("Stopped certificate event watcher.")
+				return
+			}
+		}
+	}()
 }
 
 func syncCertificates(db *bolt.DB) error {
@@ -62,26 +87,6 @@ func syncCertificates(db *bolt.DB) error {
 	}
 	wg.Wait()
 	return nil
-}
-
-func watchCertificateEvents(db *bolt.DB) <-chan error {
-	errc := make(chan error, 1)
-
-	events, watchErrs := monitorCertificateEvents()
-	go func() {
-		for {
-			select {
-			case event := <-events:
-				err := processCertificateEvent(event, db)
-				if err != nil {
-					errc <- err
-				}
-			case err := <-watchErrs:
-				errc <- err
-			}
-		}
-	}()
-	return errc
 }
 
 func processCertificateEvent(c CertificateEvent, db *bolt.DB) error {
