@@ -143,7 +143,7 @@ func processCertificate(c Certificate, db *bolt.DB) error {
 
 	// We need to make sure the DNS challenge record has propagated across the
 	// authoritative nameservers for the fqdn before accepting the ACME challenge.
-	if err := waitDNS(fqdn, value, ttl); err != nil {
+	if err := googleDNSClient.monitorDNSPropagation(fqdn, value, ttl); err != nil {
 		return err
 	}
 

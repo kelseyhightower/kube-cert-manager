@@ -8,8 +8,10 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"net"
 	"net/http"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/certifi/gocertifi"
@@ -141,57 +143,70 @@ func (c *GoogleDNSClient) DeleteDNSRecord(fqdn string) error {
 	return nil
 }
 
-func waitDNS(fqdn, value string, ttl int) error {
-	// Add a timeout so we don't block forever.
+func (c *GoogleDNSClient) monitorDNSPropagation(fqdn, value string, ttl int) error {
 	dnsClient := new(dns.Client)
 	dnsClient.Net = "tcp"
 	dnsClient.Timeout = time.Second * 10
 
-	for {
-		m := new(dns.Msg)
-		m.SetQuestion(fqdn, dns.TypeTXT)
-		m.SetEdns0(4096, false)
-		m.RecursionDesired = false
+	ns, err := net.LookupNS(c.domain)
+	if err != nil {
+		return err
+	}
+	nameservers := make([]string, 0)
+	for _, s := range ns {
+		nameservers = append(nameservers, net.JoinHostPort(s.Host, "53"))
+	}
 
-		nameservers := []string{
-			"8.8.8.8:53",
-			"8.8.4.4:53",
-		}
+	log.Printf("Monitoring %s DNS propagation: %s", fqdn, strings.Join(nameservers, " "))
 
-		for _, ns := range nameservers {
+	dnsMsg := new(dns.Msg)
+	dnsMsg.SetQuestion(fqdn, dns.TypeTXT)
+	dnsMsg.SetEdns0(4096, false)
+	dnsMsg.RecursionDesired = false
+
+	var wg sync.WaitGroup
+	for _, ns := range nameservers {
+		wg.Add(1)
+		go func(ns string) {
+			defer wg.Done()
 			for {
-				var found bool
-				in, _, err := dnsClient.Exchange(m, ns)
+				in, _, err := dnsClient.Exchange(dnsMsg, ns)
 				if err != nil {
 					log.Println(err)
-					time.Sleep(5 * time.Second)
+					time.Sleep(1 * time.Second)
 					continue
 				}
 
 				if len(in.Answer) == 0 {
-					time.Sleep(5 * time.Second)
+					time.Sleep(1 * time.Second)
 					continue
 				}
 
 				for _, rr := range in.Answer {
 					if txt, ok := rr.(*dns.TXT); ok {
 						if strings.Join(txt.Txt, "") == value {
-							log.Printf("matching TXT record found [%s]", ns)
-							found = true
-							break
+							log.Printf("%s DNS-01 challenge complete on %s", c.domain, ns)
+							return
 						}
 					}
 				}
-				if found {
-					break
-				}
 			}
-		}
-		break
+		}(ns)
 	}
 
-	time.Sleep(30 * time.Second)
-	return nil
+	done := make(chan struct{})
+	go func() {
+		wg.Wait()
+		close(done)
+	}()
+
+	select {
+	case <-done:
+		log.Printf("%s DNS propagation complete.", fqdn)
+		return nil
+	case <-time.After(300 * time.Second):
+		return fmt.Errorf("Timeout waiting for %s DNS propagation", fqdn)
+	}
 }
 
 func DNSChallengeRecord(domain, token, jwkThumbprint string) (string, string, int) {
