@@ -72,7 +72,6 @@ func watchCertificateEvents(db *bolt.DB) <-chan error {
 		for {
 			select {
 			case event := <-events:
-				log.Printf("Processing certificate event: %s", event.Object.Metadata["name"])
 				err := processCertificateEvent(event, db)
 				if err != nil {
 					errc <- err
