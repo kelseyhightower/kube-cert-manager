@@ -47,12 +47,10 @@ func main() {
 	log.Println("Kubernetes Certificate Controller started successfully.")
 
 	// Process all Certificates definitions during the startup process.
-	log.Println("Synchronizing certificates...")
 	err = syncCertificates(db)
 	if err != nil {
 		log.Println(err)
 	}
-	log.Println("Synchronizing certificates complete.")
 
 	// Watch for events that add, modify, or delete Certificate definitions and
 	// process them asynchronously.
