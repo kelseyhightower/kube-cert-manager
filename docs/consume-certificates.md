@@ -46,7 +46,7 @@ kubectl create -f dynamic-certs/deployments/dynamic-certs.yaml
 deployment "dynamic-certs" created
 ```
 
-Review the logs:
+Review the `dynamic-certs` logs:
 
 ```
 kubectl logs dynamic-certs-1623907102-wg95k
@@ -68,6 +68,8 @@ kubectl delete certificates hightowerlabs-dot-com
 ```
 certificate "hightowerlabs-dot-com" deleted
 ```
+
+Review the `kube-cert-manager` logs:
 
 ```
 kubectl logs kube-cert-manager-1999323568-npjf5 kube-cert-manager -f
