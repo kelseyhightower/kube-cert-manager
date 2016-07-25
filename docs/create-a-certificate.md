@@ -62,13 +62,16 @@ After submitting the Certificate configuration to the Kubernetes API it will be 
 Logs from the `kube-cert-manager`:
 
 ```
-2016/07/24 14:32:12 Processing certificate event for hightowerlabs-dot-com
-2016/07/24 14:32:12 ACME account for kelsey.hightower@gmail.com not found. Creating new account.
-2016/07/24 14:32:17 matching TXT record found [ns-cloud-c1.googledomains.com:53]
-2016/07/24 14:32:40 matching TXT record found [ns-cloud-c2.googledomains.com:53]
-2016/07/24 14:32:41 matching TXT record found [ns-cloud-c3.googledomains.com:53]
-2016/07/24 14:32:41 matching TXT record found [ns-cloud-c4.googledomains.com:53]
-2016/07/24 14:33:15 Secret [hightowerlabs.com] not found. Creating...
+2016/07/25 06:37:58 Processing certificate event: hightowerlabs-dot-com
+2016/07/25 06:37:58 Creating new Let's Encrypt account: hightowerlabs.com
+2016/07/25 06:38:02 Monitoring _acme-challenge.hightowerlabs.com. DNS propagation: ns-cloud-c1.googledomains.com.:53 ns-cloud-c2.googledomains.com.:53 ns-cloud-c3.googledomains.com.:53 ns-cloud-c4.googledomains.com.:53
+2016/07/25 06:38:20 hightowerlabs.com DNS-01 challenge complete on ns-cloud-c1.googledomains.com.:53
+2016/07/25 06:38:25 hightowerlabs.com DNS-01 challenge complete on ns-cloud-c3.googledomains.com.:53
+2016/07/25 06:38:25 hightowerlabs.com DNS-01 challenge complete on ns-cloud-c4.googledomains.com.:53
+2016/07/25 06:38:49 hightowerlabs.com DNS-01 challenge complete on ns-cloud-c2.googledomains.com.:53
+2016/07/25 06:39:19 _acme-challenge.hightowerlabs.com. DNS propagation complete.
+2016/07/25 06:39:22 hightowerlabs.com secret missing.
+2016/07/25 06:39:22 hightowerlabs.com secret created.
 ```
 
 ## Results
@@ -78,7 +81,7 @@ kubectl get secrets hightowerlabs.com
 ```
 ```
 NAME                TYPE                DATA      AGE
-hightowerlabs.com   kubernetes.io/tls   2         10m
+hightowerlabs.com   kubernetes.io/tls   2         1m
 ```
 
 ```
