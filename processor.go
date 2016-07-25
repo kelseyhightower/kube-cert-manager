@@ -5,34 +5,72 @@ import (
 	"encoding/pem"
 	"errors"
 	"log"
+	"sync"
 	"time"
 
 	"github.com/boltdb/bolt"
 	"github.com/google/acme"
 )
 
-func syncCertificates(interval int, db *bolt.DB) <-chan error {
+// processorLock ensures that Certificate reconciliation and Certificate
+// event processing does not happen at the same time.
+var processorLock = &sync.Mutex{}
+
+func reconcileCertificates(interval int, db *bolt.DB) <-chan error {
 	errc := make(chan error, 1)
 	go func() {
 		for {
-			var err error
 			time.Sleep(time.Duration(interval) * time.Second)
-			var certificates []Certificate
-			for {
-				certificates, err = getCertificates()
-				if err != nil {
-					errc <- err
-					time.Sleep(5 * time.Second)
-					continue
-				}
-				break
+			log.Println("Reconciler: reconciling certificates...")
+			err := syncCertificates(db)
+			if err != nil {
+				errc <- err
 			}
-			for _, cert := range certificates {
-				err := processCertificate(cert, db)
+			log.Println("Reconciler: reconciling certificates complete.")
+		}
+	}()
+	return errc
+}
+
+func syncCertificates(db *bolt.DB) error {
+	processorLock.Lock()
+	defer processorLock.Unlock()
+
+	certificates, err := getCertificates()
+	if err != nil {
+		return err
+	}
+
+	var wg sync.WaitGroup
+	for _, cert := range certificates {
+		wg.Add(1)
+		go func(cert Certificate) {
+			defer wg.Done()
+			err := processCertificate(cert, db)
+			if err != nil {
+				log.Println(err)
+			}
+		}(cert)
+	}
+	wg.Wait()
+	return nil
+}
+
+func watchCertificateEvents(db *bolt.DB) <-chan error {
+	errc := make(chan error, 1)
+
+	events, watchErrs := monitorCertificateEvents()
+	go func() {
+		for {
+			select {
+			case event := <-events:
+				log.Printf("Processing certificate event: %s", event.Object.Metadata["name"])
+				err := processCertificateEvent(event, db)
 				if err != nil {
 					errc <- err
-					continue
 				}
+			case err := <-watchErrs:
+				errc <- err
 			}
 		}
 	}()
@@ -40,6 +78,8 @@ func syncCertificates(interval int, db *bolt.DB) <-chan error {
 }
 
 func processCertificateEvent(c CertificateEvent, db *bolt.DB) error {
+	processorLock.Lock()
+	defer processorLock.Unlock()
 	switch {
 	case c.Type == "ADDED":
 		return processCertificate(c.Object, db)

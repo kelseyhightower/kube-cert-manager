@@ -7,7 +7,6 @@ import (
 	"net/http"
 	_ "net/http/pprof"
 	"path"
-	"time"
 
 	"github.com/boltdb/bolt"
 )
@@ -48,48 +47,29 @@ func main() {
 	log.Println("Kubernetes Certificate Controller started successfully.")
 
 	// Process all Certificates definitions during the startup process.
-	log.Println("Processing all certificates...")
-	var certificates []Certificate
-	for {
-		certificates, err = getCertificates()
-		if err != nil {
-			log.Println(err)
-			time.Sleep(5 * time.Second)
-			continue
-		}
-		break
+	log.Println("Synchronizing certificates...")
+	err = syncCertificates(db)
+	if err != nil {
+		log.Println(err)
 	}
-	for _, cert := range certificates {
-		log.Printf("Processing certificate: %s", cert.Metadata["name"])
-		err := processCertificate(cert, db)
-		if err != nil {
-			log.Println(err)
-			continue
-		}
-	}
+	log.Println("Synchronizing certificates complete.")
 
 	// Watch for events that add, modify, or delete Certificate definitions and
 	// process them asynchronously.
-	log.Println("Watching for certificate events...")
-	events, errs := watchCertificateEvents()
+	log.Println("Watching for certificate events.")
+	watchErrs := watchCertificateEvents(db)
 
 	// Start the certificate reconciler that will ensure all Certificate
 	// definitions are backed by a LetsEncrypt certificate and a Kubernetes
 	// TLS secret.
-	log.Println("Starting reconciliation loop...")
-	syncErrs := syncCertificates(syncInterval, db)
+	log.Println("Starting reconciliation loop.")
+	reconcileErrs := reconcileCertificates(syncInterval, db)
 
 	for {
 		select {
-		case event := <-events:
-			log.Printf("Processing certificate event: %s", event.Object.Metadata["name"])
-			err := processCertificateEvent(event, db)
-			if err != nil {
-				log.Println(err)
-			}
-		case err := <-errs:
+		case err := <-watchErrs:
 			log.Println(err)
-		case err := <-syncErrs:
+		case err := <-reconcileErrs:
 			log.Println(err)
 		}
 	}

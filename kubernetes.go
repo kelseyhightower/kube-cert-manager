@@ -69,7 +69,7 @@ func getCertificates() ([]Certificate, error) {
 	return certList.Items, nil
 }
 
-func watchCertificateEvents() (<-chan CertificateEvent, <-chan error) {
+func monitorCertificateEvents() (<-chan CertificateEvent, <-chan error) {
 	events := make(chan CertificateEvent)
 	errc := make(chan error, 1)
 	go func() {
