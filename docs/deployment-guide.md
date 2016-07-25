@@ -54,13 +54,20 @@ deployment "kube-cert-manager" created
 Review the `kube-cert-manager` logs:
 
 ```
-kubectl logs kube-cert-manager-2924908400-ua73z kube-cert-manager
+kubectl get pods
+```
+```
+NAME                                 READY     STATUS    RESTARTS   AGE
+kube-cert-manager-1999323568-op6nk   2/2       Running   0          25s
 ```
 
 ```
-2016/07/24 14:31:04 Starting Kubernetes Certificate Controller...
-2016/07/24 14:31:04 Kubernetes Certificate Controller started successfully.
-2016/07/24 14:31:04 Processing all certificates...
-2016/07/24 14:31:09 Watching for certificate changes...
-2016/07/24 14:31:09 Starting reconciliation loop...
+kubectl logs kube-cert-manager-1999323568-op6nk kube-cert-manager
+```
+
+```
+2016/07/25 06:33:21 Starting Kubernetes Certificate Controller...
+2016/07/25 06:33:22 Kubernetes Certificate Controller started successfully.
+2016/07/25 06:33:27 Watching for certificate events.
+2016/07/25 06:33:27 Starting reconciliation loop.
 ```
