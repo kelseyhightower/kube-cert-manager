@@ -13,7 +13,7 @@ By default `kube-cert-manager` obtains certificates from the Let's Encrypt stagi
 
 ### Create the Certificate Third Party Resource
 
-The `kube-cert-manager` is driven by [Kubernetes Certificate Objects](docs/certificate-objects.md). Certificates are not a core Kubernetes kind, but can be enabled with the [Certificate Third Party Resource](docs/certificate-third-party-resource.md):
+The `kube-cert-manager` is driven by [Kubernetes Certificate Objects](certificate-objects.md). Certificates are not a core Kubernetes kind, but can be enabled with the [Certificate Third Party Resource](certificate-third-party-resource.md):
 
 Create the Certificate Third Party Resource:
 
