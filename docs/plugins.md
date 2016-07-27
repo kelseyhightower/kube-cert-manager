@@ -1,6 +1,12 @@
 # DNS Provider Plugins
 
-The Kubernetes Certificate Manager does not have support for any DNS providers built in. Support for DNS providers is done using [DNS-01 exec plugins](https://github.com/kelseyhightower/dns01-exec-plugins). To ease initial deployments the `kelseyhightower/kube-cert-manager` image ships with the `googledns` dns01 exec plugin baked in. See the [Dockerfile](https://github.com/kelseyhightower/kube-cert-manager/blob/master/Dockerfile) for more info.
+The Kubernetes Certificate Manager does not have support for any DNS providers built in. Support for DNS providers is done using [dns-01 exec plugins](https://github.com/kelseyhightower/dns01-exec-plugins). To ease initial deployments the `kelseyhightower/kube-cert-manager` image ships with the `googledns` dns01 exec plugin baked in. See the [Dockerfile](https://github.com/kelseyhightower/kube-cert-manager/blob/master/Dockerfile) for more info.
+
+## Why Exec Based Plugins?
+
+The plugin model was chosen because the API between the Kubernetes Certificate Manager is rather simple. dns-01 exec plugins only need to create or delete a single DNS TXT record.
+
+Exec based plugins also make it easy for people to extend the Kubernetes Certificate Manager without recompiling the `kube-cert-manager` binary. Exec based plugins also let people build plugins in their language of choice. This is a huge win because not everyone uses Go for everything.
 
 ## Creating DNS-01 Exec Plugins
 
