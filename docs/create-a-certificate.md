@@ -1,17 +1,15 @@
 # Creating a Certificate
 
-Let's Encrypt issued certificates are automatically created for each Kubernetes Certificate object.
+Let's Encrypt issued certificates are automatically created for each Kubernetes Certificate object. This tutorial will walk you through creating certificate objects based on the [googledns](https://github.com/kelseyhightower/dns01-exec-plugins/tree/master/googledns) dns01 exec plugin].
 
 ## Create A Google Cloud Service Account Secret
 
-The `kube-cert-manager` requires a service account with access to the Google DNS API. The service account must be stored in a Kubernetes secret that can be retrieved by the `kube-cert-manager` at runtime.
+The `googledns` plugin requires a service account with access to the Google DNS API. The service account must be stored in a Kubernetes secret that can be retrieved by the `kube-cert-manager` at runtime.
 
 ```
 kubectl create secret generic hightowerlabs \
   --from-file=service-account.json
 ```
-
-> The secret key must be named `service-account.json`
 
 ```
 kubectl describe secret hightowerlabs
@@ -43,11 +41,10 @@ metadata:
 spec:
   domain: "hightowerlabs.com"
   email: "kelsey.hightower@gmail.com"
-  project: "hightowerlabs"
-  serviceAccount: "hightowerlabs"
+  provider: "googledns"
+  secret: "hightowerlabs"
+  secretKey: "service-account.json"
 ```
-
-> The `spec.serviceAccount` value must match the name of a Kubernetes secret that holds a Google service account.
 
 ```
 kubectl create -f kubernetes/certificates/hightowerlabs-com.yaml
