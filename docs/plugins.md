@@ -4,7 +4,7 @@ The Kubernetes Certificate Manager does not have support for any DNS providers b
 
 ## Creating DNS-01 Exec Plugins
 
-See the [DNS-01 exec plugins] github repo for more details and example implementations(https://github.com/kelseyhightower/dns01-exec-plugins)
+See the [DNS-01 exec plugins](https://github.com/kelseyhightower/dns01-exec-plugins) github repo for more details and example implementations.
 
 ## Shipping DNS-01 Exec Plugins
 
@@ -23,7 +23,7 @@ ADD cloudflare /cloudflare
 ENTRYPOINT ["/kube-cert-manager"]
 ```
 
-Ideally each plugin should be self-contained and compiled for Linux. For go programs that means building your binaries like this:
+Ideally each plugin should be self-contained and compiled for Linux. For Go programs that means building your binaries like this:
 
 ```
 cd $PLUGINDIR/cloudflare
@@ -37,8 +37,8 @@ GOOS=linux go build \
   -o cloudflare .
 ```
 
-See the [googledns](https://github.com/kelseyhightower/dns01-exec-plugins/tree/master/googledns) plugin for working example.
+See the [googledns](https://github.com/kelseyhightower/dns01-exec-plugins/tree/master/googledns) plugin for a working example.
 
-### Non Go Plugins
+## Non Go Plugins
 
 dns01 exec plugins can be written in any language, but you must be sure to build a container image with all the necessary runtimes and libraries to make them work.
