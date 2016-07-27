@@ -44,8 +44,9 @@ type Certificate struct {
 type CertificateSpec struct {
 	Domain         string `json:"domain"`
 	Email          string `json:"email"`
-	Project        string `json:"project"`
-	ServiceAccount string `json:"serviceAccount"`
+	Provider       string `json:"provider"`
+	Secret         string `json:"secret"`
+	SecretKey      string `json:"secretKey"`
 }
 
 type CertificateList struct {
@@ -119,7 +120,7 @@ func monitorCertificateEvents() (<-chan CertificateEvent, <-chan error) {
 	return events, errc
 }
 
-func getServiceAccountFromSecret(name string) ([]byte, error) {
+func getDNSConfigFromSecret(name, key string) ([]byte, error) {
 	resp, err := http.Get(apiHost + secretsEndpoint + "/" + name)
 	if err != nil {
 		return nil, err
@@ -131,16 +132,16 @@ func getServiceAccountFromSecret(name string) ([]byte, error) {
 		return nil, err
 	}
 
-	data, ok := secret.Data["service-account.json"]
+	data, ok := secret.Data[key]
 	if !ok {
-		return nil, errors.New("Secret key service-account.json not found")
+		return nil, fmt.Errorf("Secret key %s not found", key)
 	}
-	serviceAccount, err := base64.StdEncoding.DecodeString(data)
+	config, err := base64.StdEncoding.DecodeString(data)
 	if err != nil {
 		return nil, err
 	}
 
-	return serviceAccount, nil
+	return config, nil
 }
 
 func checkSecret(name string) (bool, error) {

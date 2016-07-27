@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: kube-cert-manager
-          image: kelseyhightower/kube-cert-manager:0.1.0
+          image: kelseyhightower/kube-cert-manager:0.2.0
           imagePullPolicy: Always
           args:
             - "-data-dir=/var/lib/cert-manager" 

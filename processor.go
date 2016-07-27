@@ -174,28 +174,25 @@ func processCertificate(c Certificate, db *bolt.DB) error {
 	jwkThumbprint := acme.JWKThumbprint(&account.AccountKey.PublicKey)
 	fqdn, value, ttl := DNSChallengeRecord(c.Spec.Domain, challenge.Token, jwkThumbprint)
 
-	serviceAccount, err := getServiceAccountFromSecret(c.Spec.ServiceAccount)
-	if err != nil {
-		return errors.New("Error getting service account from secret" + err.Error())
-	}
-
-	googleDNSClient, err := NewGoogleDNSClient(serviceAccount, c.Spec.Project, c.Spec.Domain)
-	if err != nil {
-		return errors.New("Error creating google DNS client" + err.Error())
+	dnsExecClient := &dnsClient{
+		c.Spec.Domain,
+		c.Spec.Provider,
+		c.Spec.Secret,
+		c.Spec.SecretKey,
 	}
 
 	// Cleaning up the DNS challenge here creates a race between two processes
 	// managing DNS challenge records.
-	googleDNSClient.DeleteDNSRecord(fqdn)
+	dnsExecClient.deleteRecord(fqdn, value, ttl)
 
-	err = googleDNSClient.CreateDNSRecord(fqdn, value, ttl)
+	err = dnsExecClient.createRecord(fqdn, value, ttl)
 	if err != nil {
 		return err
 	}
 
 	// We need to make sure the DNS challenge record has propagated across the
 	// authoritative nameservers for the fqdn before accepting the ACME challenge.
-	if err := googleDNSClient.monitorDNSPropagation(fqdn, value, ttl); err != nil {
+	if err := dnsExecClient.monitorDNSPropagation(fqdn, value, ttl); err != nil {
 		return err
 	}
 
@@ -225,7 +222,7 @@ func processCertificate(c Certificate, db *bolt.DB) error {
 		return errors.New("Error creating Kubernetes secret: " + err.Error())
 	}
 
-	err = googleDNSClient.DeleteDNSRecord(fqdn)
+	err = dnsExecClient.deleteRecord(fqdn, value, ttl)
 	if err != nil {
 		return err
 	}
