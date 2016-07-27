@@ -7,7 +7,7 @@ This is not an official Google Project.
 * Manage Kubernetes TLS secrets backed by Let's Encrypt issued certificates.
 * Manage [Let's Encrypt](https://letsencrypt.org) issued certificates based on Kubernetes ThirdParty Resources.
 * Domain validation using ACME [dns-01 challenges](https://letsencrypt.github.io/acme-spec/#rfc.section.7.4).
-* Support for multiple DNS providers via [DNS-01 exec plugins](https://github.com/kelseyhightower/dns01-exec-plugins)
+* Support for multiple DNS providers via [dns-01 exec plugins](https://github.com/kelseyhightower/dns01-exec-plugins)
 
 ## Project Goals
 
