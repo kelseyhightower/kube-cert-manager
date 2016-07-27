@@ -1,6 +1,6 @@
 # Creating a Certificate
 
-Let's Encrypt issued certificates are automatically created for each Kubernetes Certificate object. This tutorial will walk you through creating certificate objects based on the [googledns](https://github.com/kelseyhightower/dns01-exec-plugins/tree/master/googledns) dns01 exec plugin].
+Let's Encrypt issued certificates are automatically created for each Kubernetes Certificate object. This tutorial will walk you through creating certificate objects based on the [googledns](https://github.com/kelseyhightower/dns01-exec-plugins/tree/master/googledns) dns01 exec plugin.
 
 ## Create A Google Cloud Service Account Secret
 
