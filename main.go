@@ -33,7 +33,7 @@ var (
 
 func main() {
 	flag.StringVar(&dataDir, "data-dir", dataDir, "Data directory path.")
-	flag.StringVar(&discoveryURL, "amce-url", discoveryURL, "AMCE endpoint URL.")
+	flag.StringVar(&discoveryURL, "acme-url", discoveryURL, "AMCE endpoint URL.")
 	flag.IntVar(&syncInterval, "sync-interval", syncInterval, "Sync interval in seconds.")
 	flag.Parse()
 
