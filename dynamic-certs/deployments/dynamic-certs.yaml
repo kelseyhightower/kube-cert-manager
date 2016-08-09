@@ -13,7 +13,7 @@ spec:
     spec:
       containers:
       - name: dynamic-certs
-        image: kelseyhightower/dynamic-certs:1.0.0
+        image: kelseyhightower/dynamic-certs:1.0.1
         args:
           - "-tls-cert=/etc/tls/tls.crt"
           - "-tls-key=/etc/tls/tls.key"

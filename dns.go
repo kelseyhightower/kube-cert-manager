@@ -92,10 +92,10 @@ func (c *dnsClient) deleteRecord(fqdn, value string, ttl int) error {
 	_, err = cmd.Output()
 	if err != nil {
 		exitError, ok := err.(*exec.ExitError)
-        if ok {
-            return errors.New(string(exitError.Stderr))
-        }
-        return err
+		if ok {
+			return errors.New(string(exitError.Stderr))
+		}
+		return err
 	}
 	return nil
 }

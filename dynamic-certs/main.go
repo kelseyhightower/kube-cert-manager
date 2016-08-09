@@ -13,15 +13,20 @@ package main
 import (
 	"crypto/tls"
 	"flag"
-	"io"
 	"log"
 	"net/http"
+	"os"
 )
 
 var (
 	httpAddr string
 	tlsCert  string
 	tlsKey   string
+)
+
+var (
+	hostname string
+	cm       *CertificateManager
 )
 
 func main() {
@@ -32,14 +37,17 @@ func main() {
 
 	log.Println("Initializing application...")
 
-	cm, err := NewCertificateManager(tlsCert, tlsKey)
+	var err error
+	cm, err = NewCertificateManager(tlsCert, tlsKey)
+	if err != nil {
+		log.Fatal(err)
+	}
+	hostname, err = os.Hostname()
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	http.HandleFunc("/", func(w http.ResponseWriter, req *http.Request) {
-		io.WriteString(w, "Hello, World!\n")
-	})
+	http.HandleFunc("/", httpHandler)
 
 	server := http.Server{
 		TLSConfig: &tls.Config{

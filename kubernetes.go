@@ -42,11 +42,11 @@ type Certificate struct {
 }
 
 type CertificateSpec struct {
-	Domain         string `json:"domain"`
-	Email          string `json:"email"`
-	Provider       string `json:"provider"`
-	Secret         string `json:"secret"`
-	SecretKey      string `json:"secretKey"`
+	Domain    string `json:"domain"`
+	Email     string `json:"email"`
+	Provider  string `json:"provider"`
+	Secret    string `json:"secret"`
+	SecretKey string `json:"secretKey"`
 }
 
 type CertificateList struct {
@@ -231,7 +231,7 @@ func syncKubernetesSecret(domain string, cert, key []byte) error {
 
 	if resp.StatusCode == 404 {
 		log.Printf("%s secret missing.", domain)
-		b := make([]byte, 0)
+		var b []byte
 		body := bytes.NewBuffer(b)
 		err := json.NewEncoder(body).Encode(secret)
 		if err != nil {
