@@ -22,8 +22,8 @@ spec:
           volumeMounts:
             - name: data
               mountPath: /var/lib/cert-manager
-        - name: kubelet
-          image: kelseyhightower/kubectl:1.2.3
+        - name: kubectl
+          image: kelseyhightower/kubectl:1.3.4
           args:
             - "proxy"
       volumes:
