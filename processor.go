@@ -148,7 +148,6 @@ func processCertificate(c Certificate, db *bolt.DB) error {
 	}
 
 	if account.CertificateURL != "" {
-		log.Printf("Syncing Kubernetes secret: %s", c.Spec.Domain)
 		cert, err := acmeClient.RenewCert(account.CertificateURL)
 		if err != nil {
 			return errors.New("Error renewing certificate" + err.Error())
