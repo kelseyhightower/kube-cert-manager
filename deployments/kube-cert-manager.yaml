@@ -18,7 +18,7 @@ spec:
           imagePullPolicy: Always
           args:
             - "-data-dir=/var/lib/cert-manager" 
-            - "-amce-url=https://acme-staging.api.letsencrypt.org/directory"
+            - "-amce-url=https://acme-v01.api.letsencrypt.org/directory"
           volumeMounts:
             - name: data
               mountPath: /var/lib/cert-manager

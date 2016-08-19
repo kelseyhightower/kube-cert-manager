@@ -1,0 +1,3 @@
+GOOS=linux go build .
+docker build --no-cache -t kelseyhightower/tls-app:1.0.0 .
+docker push kelseyhightower/tls-app:1.0.0

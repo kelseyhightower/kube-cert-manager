@@ -1,3 +1,0 @@
-GOOS=linux go build .
-docker build -t kelseyhightower/dynamic-certs:1.0.1 .
-docker push kelseyhightower/dynamic-certs:1.0.1

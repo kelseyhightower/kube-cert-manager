@@ -1,19 +1,19 @@
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
-  name: dynamic-certs
+  name: tls-app
   labels:
-    app: dynamic-certs
+    app: tls-app
 spec:
   replicas: 1
   template:
     metadata:
       labels:
-        app: dynamic-certs
+        app: tls-app
     spec:
       containers:
-      - name: dynamic-certs
-        image: kelseyhightower/dynamic-certs:1.0.1
+      - name: tls-app
+        image: kelseyhightower/tls-app:1.0.0
         args:
           - "-tls-cert=/etc/tls/tls.crt"
           - "-tls-key=/etc/tls/tls.key"
@@ -25,9 +25,9 @@ spec:
             memory: "50Mi"
             cpu: ".1"
         volumeMounts:
-          - name: dynamic-certs-tls
+          - name: tls
             mountPath: /etc/tls
       volumes:
-        - name: dynamic-certs-tls
+        - name: tls
           secret:
             secretName: hightowerlabs.com
