@@ -24,6 +24,8 @@ import (
 	"sync"
 	"time"
 
+	"golang.org/x/net/publicsuffix"
+
 	"github.com/miekg/dns"
 )
 
@@ -105,7 +107,11 @@ func (c *dnsClient) monitorDNSPropagation(fqdn, value string, ttl int) error {
 	dnsClient.Net = "tcp"
 	dnsClient.Timeout = time.Second * 10
 
-	ns, err := net.LookupNS(c.domain)
+	suffix, err := publicsuffix.EffectiveTLDPlusOne(strings.TrimSuffix(fqdn, "."))
+	if err != nil {
+		return err
+	}
+	ns, err := net.LookupNS(dns.Fqdn(suffix))
 	if err != nil {
 		return err
 	}
