@@ -120,7 +120,7 @@ func monitorCertificateEvents() (<-chan CertificateEvent, <-chan error) {
 }
 
 func getDNSConfigFromSecret(name, namespace, key string) ([]byte, error) {
-	resp, err := http.Get(certificateEndpoint(namespace, name))
+	resp, err := http.Get(secretEndpoint(namespace, name))
 	if err != nil {
 		return nil, err
 	}
@@ -145,7 +145,7 @@ func getDNSConfigFromSecret(name, namespace, key string) ([]byte, error) {
 
 func deleteKubernetesSecret(c Certificate) error {
 
-	req, err := http.NewRequest("DELETE", certificateEndpoint(c.Metadata["namespace"], c.Spec.Domain), nil)
+	req, err := http.NewRequest("DELETE", secretEndpoint(c.Metadata["namespace"], c.Spec.Domain), nil)
 	if err != nil {
 		return err
 	}
@@ -159,7 +159,7 @@ func deleteKubernetesSecret(c Certificate) error {
 	return nil
 }
 
-func certificateEndpoint(namespace string, name string) string {
+func secretEndpoint(namespace string, name string) string {
 	return apiHost + "/api/v1/namespaces/" + namespace + "/secrets/" + name
 }
 
@@ -178,7 +178,7 @@ func syncKubernetesSecret(requested Certificate, cert, key []byte) error {
 		Metadata:   metadata,
 		Type:       "kubernetes.io/tls",
 	}
-	endPoint := certificateEndpoint(requested.Metadata["namespace"], requested.Spec.Domain)
+	endPoint := secretEndpoint(requested.Metadata["namespace"], requested.Spec.Domain)
 	fmt.Println("Secret endpoint is: " + endPoint)
 	resp, err := http.Get(endPoint)
 	if err != nil {
