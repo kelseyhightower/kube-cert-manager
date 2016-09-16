@@ -179,7 +179,6 @@ func syncKubernetesSecret(requested Certificate, cert, key []byte) error {
 		Type:       "kubernetes.io/tls",
 	}
 	endPoint := secretEndpoint(requested.Metadata["namespace"], requested.Spec.Domain)
-	fmt.Println("Secret endpoint is: " + endPoint)
 	resp, err := http.Get(endPoint)
 	if err != nil {
 		return err
