@@ -24,9 +24,8 @@ import (
 
 var (
 	apiHost                   = "http://127.0.0.1:8001"
-	certificatesEndpoint      = "/apis/stable.hightower.com/v1/namespaces/default/certificates"
-	certificatesWatchEndpoint = "/apis/stable.hightower.com/v1/namespaces/default/certificates?watch=true"
-	secretsEndpoint           = "/api/v1/namespaces/default/secrets"
+	certificatesEndpoint      = "/apis/stable.hightower.com/v1/certificates"
+	certificatesWatchEndpoint = "/apis/stable.hightower.com/v1/certificates?watch=true"
 )
 
 type CertificateEvent struct {
@@ -120,8 +119,8 @@ func monitorCertificateEvents() (<-chan CertificateEvent, <-chan error) {
 	return events, errc
 }
 
-func getDNSConfigFromSecret(name, key string) ([]byte, error) {
-	resp, err := http.Get(apiHost + secretsEndpoint + "/" + name)
+func getDNSConfigFromSecret(name, namespace, key string) ([]byte, error) {
+	resp, err := http.Get(certificateEndpoint(namespace, name))
 	if err != nil {
 		return nil, err
 	}
@@ -144,19 +143,9 @@ func getDNSConfigFromSecret(name, key string) ([]byte, error) {
 	return config, nil
 }
 
-func checkSecret(name string) (bool, error) {
-	resp, err := http.Get(apiHost + secretsEndpoint + "/" + name)
-	if err != nil {
-		return false, err
-	}
-	if resp.StatusCode != 200 {
-		return false, nil
-	}
-	return true, nil
-}
+func deleteKubernetesSecret(c Certificate) error {
 
-func deleteKubernetesSecret(domain string) error {
-	req, err := http.NewRequest("DELETE", apiHost+secretsEndpoint+"/"+domain, nil)
+	req, err := http.NewRequest("DELETE", certificateEndpoint(c.Metadata["namespace"], c.Spec.Domain), nil)
 	if err != nil {
 		return err
 	}
@@ -165,14 +154,18 @@ func deleteKubernetesSecret(domain string) error {
 		return err
 	}
 	if resp.StatusCode != 200 {
-		return fmt.Errorf("Deleting %s secret failed: %s", domain, resp.Status)
+		return fmt.Errorf("Deleting %s secret failed: %s", c.Spec.Domain, resp.Status)
 	}
 	return nil
 }
 
-func syncKubernetesSecret(domain string, cert, key []byte) error {
+func certificateEndpoint(namespace string, name string) string {
+	return apiHost + "/api/v1/namespaces/" + namespace + "/secrets/" + name
+}
+
+func syncKubernetesSecret(requested Certificate, cert, key []byte) error {
 	metadata := make(map[string]string)
-	metadata["name"] = domain
+	metadata["name"] = requested.Spec.Domain
 
 	data := make(map[string]string)
 	data["tls.crt"] = base64.StdEncoding.EncodeToString(cert)
@@ -185,8 +178,9 @@ func syncKubernetesSecret(domain string, cert, key []byte) error {
 		Metadata:   metadata,
 		Type:       "kubernetes.io/tls",
 	}
-
-	resp, err := http.Get(apiHost + secretsEndpoint + "/" + domain)
+	endPoint := certificateEndpoint(requested.Metadata["namespace"], requested.Spec.Domain)
+	fmt.Println("Secret endpoint is: " + endPoint)
+	resp, err := http.Get(endPoint)
 	if err != nil {
 		return err
 	}
@@ -204,7 +198,7 @@ func syncKubernetesSecret(domain string, cert, key []byte) error {
 			return err
 		}
 		if currentSecret.Data["tls.crt"] != secret.Data["tls.crt"] || currentSecret.Data["tls.key"] != secret.Data["tls.key"] {
-			log.Printf("%s secret out of sync.", domain)
+			log.Printf("%s secret out of sync.", requested.Spec.Domain)
 			currentSecret.Data = secret.Data
 			b := make([]byte, 0)
 			body := bytes.NewBuffer(b)
@@ -212,7 +206,7 @@ func syncKubernetesSecret(domain string, cert, key []byte) error {
 			if err != nil {
 				return err
 			}
-			req, err := http.NewRequest("PUT", apiHost+secretsEndpoint+"/"+domain, body)
+			req, err := http.NewRequest("PUT", endPoint, body)
 			if err != nil {
 				return err
 			}
@@ -224,13 +218,13 @@ func syncKubernetesSecret(domain string, cert, key []byte) error {
 			if resp.StatusCode != 200 {
 				return errors.New("Updating secret failed:" + resp.Status)
 			}
-			log.Printf("Syncing %s secret complete.", domain)
+			log.Printf("Syncing %s secret complete.", requested.Spec.Domain)
 		}
 		return nil
 	}
 
 	if resp.StatusCode == 404 {
-		log.Printf("%s secret missing.", domain)
+		log.Printf("%s secret missing.", requested.Spec.Domain)
 		var b []byte
 		body := bytes.NewBuffer(b)
 		err := json.NewEncoder(body).Encode(secret)
@@ -238,14 +232,14 @@ func syncKubernetesSecret(domain string, cert, key []byte) error {
 			return err
 		}
 
-		resp, err := http.Post(apiHost+secretsEndpoint, "application/json", body)
+		resp, err := http.Post(apiHost+"/api/v1/namespaces/"+requested.Metadata["namespace"]+"/secrets", "application/json", body)
 		if err != nil {
 			return err
 		}
 		if resp.StatusCode != 201 {
 			return errors.New("Secrets: Unexpected HTTP status code" + resp.Status)
 		}
-		log.Printf("%s secret created.", domain)
+		log.Printf("%s secret created.", requested.Spec.Domain)
 		return nil
 	}
 	return nil

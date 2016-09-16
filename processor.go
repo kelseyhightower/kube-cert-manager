@@ -108,7 +108,7 @@ func deleteCertificate(c Certificate, db *bolt.DB) error {
 		return errors.New("Error deleting the Let's Encrypt account " + err.Error())
 	}
 	log.Printf("Deleting Kubernetes TLS secret: %s", c.Spec.Domain)
-	return deleteKubernetesSecret(c.Spec.Domain)
+	return deleteKubernetesSecret(c)
 }
 
 func processCertificate(c Certificate, db *bolt.DB) error {
@@ -158,7 +158,7 @@ func processCertificate(c Certificate, db *bolt.DB) error {
 			Headers: nil,
 			Bytes:   x509.MarshalPKCS1PrivateKey(account.CertificateKey),
 		})
-		err = syncKubernetesSecret(c.Spec.Domain, account.Certificate, key)
+		err = syncKubernetesSecret(c, account.Certificate, key)
 		if err != nil {
 			return errors.New("Error creating Kubernetes secret: " + err.Error())
 		}
@@ -178,6 +178,7 @@ func processCertificate(c Certificate, db *bolt.DB) error {
 		c.Spec.Provider,
 		c.Spec.Secret,
 		c.Spec.SecretKey,
+		c.Metadata["namespace"],
 	}
 
 	// Cleaning up the DNS challenge here creates a race between two processes
@@ -216,7 +217,7 @@ func processCertificate(c Certificate, db *bolt.DB) error {
 		Headers: nil,
 		Bytes:   x509.MarshalPKCS1PrivateKey(account.CertificateKey),
 	})
-	err = syncKubernetesSecret(c.Spec.Domain, account.Certificate, key)
+	err = syncKubernetesSecret(c, account.Certificate, key)
 	if err != nil {
 		return errors.New("Error creating Kubernetes secret: " + err.Error())
 	}
