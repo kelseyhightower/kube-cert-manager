@@ -28,7 +28,7 @@ import (
 
 var (
 	certExpiry = 365 * 12 * time.Hour
-	certBundle = false
+	certBundle = true
 )
 
 var (
