@@ -11,45 +11,45 @@ First you'll need an application that serves up HTTPS traffic to clients. The ap
 * Support loading TLS certificates from a filesystem.
 * Support reloading certificates at runtime.
 
-The [dynamic-certs](https://github.com/kelseyhightower/kube-cert-manager/tree/master/dynamic-certs) example application meets the above requirements and will be used for this tutorial. The dynamic-certs application leverages [inotify](http://man7.org/linux/man-pages/man7/inotify.7.html) to monitor a filesystem for TLS certificate changes and reloads them without requiring a restart.
+The [tls-app](https://github.com/kelseyhightower/kube-cert-manager/tree/master/tls-app) example application meets the above requirements and will be used for this tutorial. The tls-app application leverages [inotify](http://man7.org/linux/man-pages/man7/inotify.7.html) to monitor a filesystem for TLS certificate changes and reloads them without requiring a restart.
 
 ## Create a Deployment
 
-The complete `dynamic-certs` deployment config can be found [here](https://github.com/kelseyhightower/kube-cert-manager/blob/master/dynamic-certs/deployments/dynamic-certs.yaml), for now lets focus on the important parts.
+The complete `tls-app` deployment config can be found [here](https://github.com/kelseyhightower/kube-cert-manager/blob/master/tls-app/deployments/tls-app.yaml), for now lets focus on the important parts.
 
 ```
 spec:
   containers:
-  - name: dynamic-certs
-    image: kelseyhightower/dynamic-certs:1.0.0
+  - name: tls-app
+    image: kelseyhightower/tls-app:1.0.0
     args:
       - "-tls-cert=/etc/tls/tls.crt"
       - "-tls-key=/etc/tls/tls.key"
     volumeMounts:
-      - name: dynamic-certs-tls
+      - name: tls
         mountPath: /etc/tls
   volumes:
-    - name: dynamic-certs-tls
+    - name: tls
       secret:
         secretName: hightowerlabs.com
 ```
 
 The key to consuming Kubernetes TLS secrets is to use a secret volume. Study the snippet above and notice how the `hightowerlabs.com` secret is being mounted under the `/etc/tls` directory. By default the Kubernetes Certificate Manager will store all certificates and privates key using the `tls.crt` and `tls.key` key names. This will result in two files under the `/etc/tls` directory at runtime.
 
-Use kubectl to create the `dynamic-certs` deployment:
+Use kubectl to create the `tls-app` deployment:
 
 ```
-kubectl create -f dynamic-certs/deployments/dynamic-certs.yaml
+kubectl create -f tls-app/deployments/tls-app.yaml
 ```
 
 ```
-deployment "dynamic-certs" created
+deployment "tls-app" created
 ```
 
-Review the `dynamic-certs` logs:
+Review the `tls-app` logs:
 
 ```
-kubectl logs dynamic-certs-1623907102-wg95k
+kubectl logs tls-app-1623907102-wg95k
 ```
 ```
 2016/07/25 14:15:53 Initializing application...
@@ -61,7 +61,7 @@ kubectl logs dynamic-certs-1623907102-wg95k
 #### Verify
 
 ```
-kubectl port-forward dynamic-certs-1623907102-wg95k 10443:443
+kubectl port-forward tls-app-1623907102-wg95k 10443:443
 ```
 ```
 Forwarding from 127.0.0.1:10443 -> 443
@@ -129,12 +129,12 @@ kubectl logs kube-cert-manager-1999323568-npjf5 kube-cert-manager -f
 2016/07/25 14:20:45 hightowerlabs.com secret created.
 ```
 
-After a few minutes the `dynamic-certs` application will pickup and reload the new TLS certificates.
+After a few minutes the `tls-app` application will pickup and reload the new TLS certificates.
 
-Review the `dynamic-certs` logs:
+Review the `tls-app` logs:
 
 ```
-kubectl logs dynamic-certs-1623907102-wg95k -f
+kubectl logs tls-app-1623907102-wg95k -f
 ```
 
 ```
@@ -150,7 +150,7 @@ kubectl logs dynamic-certs-1623907102-wg95k -f
 #### Verify
 
 ```
-kubectl port-forward dynamic-certs-1623907102-wg95k 10443:443
+kubectl port-forward tls-app-1623907102-wg95k 10443:443
 ```
 ```
 Forwarding from 127.0.0.1:10443 -> 443

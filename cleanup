@@ -1,3 +1,3 @@
-kubectl delete deployments dynamic-certs kube-cert-manager
+kubectl delete deployments tls-app kube-cert-manager
 kubectl delete thirdpartyresource certificate.stable.hightower.com
 kubectl delete secrets hightowerlabs hightowerlabs.com
