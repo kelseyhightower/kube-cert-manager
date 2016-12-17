@@ -14,11 +14,11 @@ spec:
     spec:
       containers:
         - name: kube-cert-manager
-          image: kelseyhightower/kube-cert-manager:0.2.0
+          image: kelseyhightower/kube-cert-manager:0.5.0
           imagePullPolicy: Always
           args:
             - "-data-dir=/var/lib/cert-manager" 
-            - "-amce-url=https://acme-v01.api.letsencrypt.org/directory"
+            - "-acme-url=https://acme-v01.api.letsencrypt.org/directory"
             - "-sync-interval=30"
           volumeMounts:
             - name: data
