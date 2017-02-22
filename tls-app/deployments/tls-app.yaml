@@ -13,7 +13,7 @@ spec:
     spec:
       containers:
       - name: tls-app
-        image: kelseyhightower/tls-app:1.0.0
+        image: gcr.io/hightowerlabs/tls-app:1.0.0
         args:
           - "-tls-cert=/etc/tls/tls.crt"
           - "-tls-key=/etc/tls/tls.key"

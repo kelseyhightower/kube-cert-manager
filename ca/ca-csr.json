@@ -1,0 +1,18 @@
+{
+  "hosts": [
+    "hightowerlabs.com"
+  ],
+  "key": {
+    "algo": "rsa",
+    "size": 2048
+  },
+  "names": [
+    {
+      "C": "US",
+      "L": "Portland",
+      "O": "Hightower Labs",
+      "OU": "CA",
+      "ST": "Oregon"
+    }
+  ]
+}
