@@ -104,11 +104,23 @@ func (c *dnsClient) monitorDNSPropagation(fqdn, value string, ttl int) error {
 	dnsClient := new(dns.Client)
 	dnsClient.Net = "tcp"
 	dnsClient.Timeout = time.Second * 10
+	delimiter := "."
+	domainSplited := strings.Split(c.domain, delimiter)
 
-	ns, err := net.LookupNS(c.domain)
-	if err != nil {
-		return err
+	var ns []*net.NS
+
+	for i := range domainSplited {
+		var err error
+		domain := strings.Join((domainSplited)[i:], delimiter)
+		ns, err = net.LookupNS(domain)
+		if err == nil {
+			break
+		} else {
+			log.Println("No NS found for:", domain)
+			log.Println(err)
+		}
 	}
+
 	nameservers := make([]string, 0)
 	for _, s := range ns {
 		nameservers = append(nameservers, net.JoinHostPort(s.Host, "53"))
