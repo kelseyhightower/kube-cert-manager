@@ -18,7 +18,7 @@ The `kube-cert-manager` is driven by [Kubernetes Certificate Objects](certificat
 Create the Certificate Third Party Resource:
 
 ```
-kubectl create -f kubernetes/extensions/certificate.yaml 
+kubectl create -f extensions/certificate.yaml 
 ```
 
 ### Create the Kubernetes Certificate Manager Deployment
@@ -47,7 +47,7 @@ The `kube-cert-manager` leverages `kubectl` running in proxy mode for API access
 Create the `kube-cert-manager` deployment:
 
 ```
-kubectl create -f kubernetes/deployments/kube-cert-manager.yaml 
+kubectl create -f deployments/kube-cert-manager.yaml 
 ```
 ```
 deployment "kube-cert-manager" created
