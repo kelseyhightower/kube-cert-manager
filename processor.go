@@ -19,7 +19,7 @@ import (
 	"time"
 
 	"github.com/boltdb/bolt"
-	"github.com/google/acme"
+	"golang.org/x/crypto/acme"
 )
 
 // processorLock ensures that Certificate reconciliation and Certificate

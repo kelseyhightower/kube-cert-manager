@@ -20,12 +20,6 @@
   version = "v1.4.2"
 
 [[projects]]
-  name = "github.com/google/acme"
-  packages = ["."]
-  revision = "405b837ccffc76ba14775a158136b4fc86083040"
-  version = "1.1.1"
-
-[[projects]]
   branch = "master"
   name = "github.com/miekg/dns"
   packages = ["."]
@@ -46,6 +40,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "6772e91c5f22dfadcfe010461291c8e19e2989ca927a63bd63caf0ed36408c94"
+  inputs-digest = "0fce94c5ebcdf93fc7d899770fa8c5ec4ed899ee1558488a6733704b8e8e203e"
   solver-name = "gps-cdcl"
   solver-version = 1

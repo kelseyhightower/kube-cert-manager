@@ -23,7 +23,7 @@ import (
 	"time"
 
 	"github.com/boltdb/bolt"
-	"github.com/google/acme"
+	"golang.org/x/crypto/acme"
 )
 
 var (

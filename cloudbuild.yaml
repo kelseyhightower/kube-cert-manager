@@ -5,12 +5,12 @@ steps:
 
   - name: "gcr.io/cloud-builders/go"
     env: ["PROJECT_ROOT=dns01-exec-plugins/googledns"]
-    args: ["build", "-a", "--ldflags", '-extldflags "-static"', "-tags", "netgo", "-installsuffix", "netgo", "."]
+    args: ["build", "-a", "-tags", "netgo", "-installsuffix", "netgo", "."]
     id: "go-build-googledns"
 
   - name: "gcr.io/cloud-builders/go"
     env: ["PROJECT_ROOT=kube-cert-manager"]
-    args: ["build", "-a", "--ldflags", '-extldflags "-static"', "-tags", "netgo", "-installsuffix", "netgo", "."]
+    args: ["build", "-a", "-tags", "netgo", "-installsuffix", "netgo", "."]
     id: "go-build-kube-cert-manager"
 
   - name: "gcr.io/cloud-builders/docker"
