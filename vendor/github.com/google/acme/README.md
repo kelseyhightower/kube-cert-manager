@@ -1,21 +1,21 @@
 # acme
 
-ACME-compliant Go client library and a command line tool. Neither has 3rd party dependencies.
-Also, see https://letsencrypt.org.
+A simple command line tool to manage TLS certificates with ACME-compliant CAs,
+which has no third party depedencies.
 
-Contents of this repo:
-
-* `/` - ACME client Go package. See [godoc for acme package](https://godoc.org/github.com/google/acme).
-  The package has been imported to golang.org/x/crypto/acme/internal/acme. I will keep
-  github.com/google/acme package mirroring crypto/acme/internal/acme until it becomes exported
-  as `golang.org/x/crypto/acme`.
-* `/cmd/acme/` - cli tool, similar to the official `letsencrypt`.
+If you're looking for a package to import in your program, `golang.org/x/crypto/acme`
+or `golang.org/x/crypto/acme/autocert` is what you'll want instead.
 
 *This package is a work in progress and makes no API stability promises.*
 
-## command line tool usage
+## Usage
 
-Quick install with `go get -u github.com/google/acme/cmd/acme`.
+Quick install with `go get -u github.com/google/acme`
+or download a pre-built binary from the
+[releases page](https://github.com/google/acme/releases).
+
+The release binaries have an additional command, `acme version`,
+which reports the release version.
 
 1. You need to have a user account, registered with the CA. This is represented
   by an RSA private key.
@@ -80,3 +80,5 @@ Quick install with `go get -u github.com/google/acme/cmd/acme`.
 ## License
 
 (c) Google, 2015. Licensed under [Apache-2](LICENSE) license.
+
+This is not an official Google product.

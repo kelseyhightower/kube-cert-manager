@@ -15,7 +15,7 @@ import (
 	"log"
 	"sync"
 
-	"golang.org/x/exp/inotify"
+	"github.com/fsnotify/fsnotify"
 )
 
 type CertificateManager struct {
@@ -24,7 +24,7 @@ type CertificateManager struct {
 	keyFile     string
 	certificate *tls.Certificate
 	Error       chan error
-	watcher     *inotify.Watcher
+	watcher     *fsnotify.Watcher
 }
 
 func NewCertificateManager(certFile, keyFile string) (*CertificateManager, error) {
@@ -70,7 +70,7 @@ func (cm *CertificateManager) watchCertificate() error {
 
 	for {
 		select {
-		case <-cm.watcher.Event:
+		case <-cm.watcher.Events:
 			log.Println("Reloading TLS certificates...")
 			err := cm.setCertificate()
 			if err != nil {
@@ -81,7 +81,7 @@ func (cm *CertificateManager) watchCertificate() error {
 			if err != nil {
 				cm.Error <- err
 			}
-		case err := <-cm.watcher.Error:
+		case err := <-cm.watcher.Errors:
 			cm.Error <- err
 		}
 	}
@@ -89,15 +89,15 @@ func (cm *CertificateManager) watchCertificate() error {
 
 func (cm *CertificateManager) newWatcher() error {
 	var err error
-	cm.watcher, err = inotify.NewWatcher()
+	cm.watcher, err = fsnotify.NewWatcher()
 	if err != nil {
 		return err
 	}
-	err = cm.watcher.AddWatch(cm.certFile, inotify.IN_IGNORED)
+	err = cm.watcher.Add(cm.certFile)
 	if err != nil {
 		return err
 	}
-	return cm.watcher.AddWatch(cm.keyFile, inotify.IN_IGNORED)
+	return cm.watcher.Add(cm.keyFile)
 }
 
 func (cm *CertificateManager) resetWatcher() error {

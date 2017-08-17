@@ -1,0 +1,15 @@
+clone:
+  depth: 1
+build:
+  image: golang:1.7
+  commands:
+    - go get ./...
+    - go test ./...
+    - make -j2
+publish:
+  github_release:
+    when:
+      event: tag
+    api_key: $$GH_API_KEY
+    files: bin/acme-*
+    checksum: sha1

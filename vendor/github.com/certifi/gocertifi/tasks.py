@@ -1,8 +1,8 @@
-from invoke import task, run
+from invoke import task
 import requests
 
 @task
-def update():
+def update(ctx):
     r = requests.get('https://mkcert.org/generate/')
     r.raise_for_status()
     certs = r.content
@@ -14,7 +14,7 @@ def update():
     assert len(file) == 3
     file[1] = certs
 
-    run("rm certifi.go")
+    ctx.run("rm certifi.go")
 
     with open('certifi.go', 'wb') as f:
         f.write('`\n'.join(file))
