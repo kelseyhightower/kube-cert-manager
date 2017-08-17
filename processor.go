@@ -178,7 +178,7 @@ func processCertificate(c Certificate, db *bolt.DB) error {
 		c.Spec.Provider,
 		c.Spec.Secret,
 		c.Spec.SecretKey,
-		c.Metadata["namespace"],
+		c.Metadata.Namespace,
 	}
 
 	// Cleaning up the DNS challenge here creates a race between two processes

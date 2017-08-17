@@ -34,10 +34,10 @@ type CertificateEvent struct {
 }
 
 type Certificate struct {
-	ApiVersion string            `json:"apiVersion"`
-	Kind       string            `json:"kind"`
-	Metadata   map[string]string `json:"metadata"`
-	Spec       CertificateSpec   `json:"spec"`
+	ApiVersion string          `json:"apiVersion"`
+	Kind       string          `json:"kind"`
+	Metadata   Metadata        `json:"metadata"`
+	Spec       CertificateSpec `json:"spec"`
 }
 
 type CertificateSpec struct {
@@ -49,18 +49,25 @@ type CertificateSpec struct {
 }
 
 type CertificateList struct {
-	ApiVersion string            `json:"apiVersion"`
-	Kind       string            `json:"kind"`
-	Metadata   map[string]string `json:"metadata"`
-	Items      []Certificate     `json:"items"`
+	ApiVersion string        `json:"apiVersion"`
+	Kind       string        `json:"kind"`
+	Metadata   Metadata      `json:"metadata"`
+	Items      []Certificate `json:"items"`
 }
 
 type Secret struct {
 	Kind       string            `json:"kind"`
 	ApiVersion string            `json:"apiVersion"`
-	Metadata   map[string]string `json:"metadata"`
+	Metadata   Metadata          `json:"metadata"`
 	Data       map[string]string `json:"data"`
 	Type       string            `json:"type"`
+}
+
+type Metadata struct {
+	Annotations map[string]string `json:"annotations"`
+	Labels      map[string]string `json:"labels"`
+	Name        string            `json:"name"`
+	Namespace   string            `json:"namespace"`
 }
 
 func getCertificates() ([]Certificate, error) {
@@ -145,7 +152,7 @@ func getDNSConfigFromSecret(name, namespace, key string) ([]byte, error) {
 
 func deleteKubernetesSecret(c Certificate) error {
 
-	req, err := http.NewRequest("DELETE", secretEndpoint(c.Metadata["namespace"], c.Spec.Domain), nil)
+	req, err := http.NewRequest("DELETE", secretEndpoint(c.Metadata.Namespace, c.Spec.Domain), nil)
 	if err != nil {
 		return err
 	}
@@ -164,8 +171,11 @@ func secretEndpoint(namespace string, name string) string {
 }
 
 func syncKubernetesSecret(requested Certificate, cert, key []byte) error {
-	metadata := make(map[string]string)
-	metadata["name"] = requested.Spec.Domain
+	metadata := Metadata{
+		Annotations: make(map[string]string),
+		Labels:      make(map[string]string),
+	}
+	metadata.Name = requested.Spec.Domain
 
 	data := make(map[string]string)
 	data["tls.crt"] = base64.StdEncoding.EncodeToString(cert)
@@ -178,7 +188,7 @@ func syncKubernetesSecret(requested Certificate, cert, key []byte) error {
 		Metadata:   metadata,
 		Type:       "kubernetes.io/tls",
 	}
-	endPoint := secretEndpoint(requested.Metadata["namespace"], requested.Spec.Domain)
+	endPoint := secretEndpoint(requested.Metadata.Namespace, requested.Spec.Domain)
 	resp, err := http.Get(endPoint)
 	if err != nil {
 		return err
@@ -231,7 +241,7 @@ func syncKubernetesSecret(requested Certificate, cert, key []byte) error {
 			return err
 		}
 
-		resp, err := http.Post(apiHost+"/api/v1/namespaces/"+requested.Metadata["namespace"]+"/secrets", "application/json", body)
+		resp, err := http.Post(apiHost+"/api/v1/namespaces/"+requested.Metadata.Namespace+"/secrets", "application/json", body)
 		if err != nil {
 			return err
 		}
