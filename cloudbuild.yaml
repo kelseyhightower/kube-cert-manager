@@ -1,0 +1,20 @@
+steps:
+  - name: gcr.io/cloud-builders/git
+    args: ['clone', 'https://github.com/kelseyhightower/dns01-exec-plugins.git']
+    id: "git-clone-dns01-exec-plugins"
+
+  - name: "gcr.io/cloud-builders/go"
+    env: ["PROJECT_ROOT=dns01-exec-plugins/googledns"]
+    args: ["build", "-a", "--ldflags", '-extldflags "-static"', "-tags", "netgo", "-installsuffix", "netgo", "."]
+    id: "go-build-googledns"
+
+  - name: "gcr.io/cloud-builders/go"
+    env: ["PROJECT_ROOT=kube-cert-manager"]
+    args: ["build", "-a", "--ldflags", '-extldflags "-static"', "-tags", "netgo", "-installsuffix", "netgo", "."]
+    id: "go-build-kube-cert-manager"
+
+  - name: "gcr.io/cloud-builders/docker"
+    args: ["build", "-t", "gcr.io/${PROJECT_ID}/kube-cert-manager:0.8.0", "."]
+    id: "docker-build"
+
+images: ["gcr.io/${PROJECT_ID}/kube-cert-manager:0.8.0"]
