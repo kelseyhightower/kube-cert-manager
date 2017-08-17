@@ -14,17 +14,17 @@ spec:
     spec:
       containers:
         - name: kube-cert-manager
-          image: gcr.io/hightowerlabs/kube-cert-manager:0.5.0
+          image: gcr.io/hightowerlabs/kube-cert-manager:0.8.0
           imagePullPolicy: Always
           args:
-            - "-data-dir=/var/lib/cert-manager" 
+            - "-data-dir=/var/lib/cert-manager"
             - "-acme-url=https://acme-v01.api.letsencrypt.org/directory"
             - "-sync-interval=30"
           volumeMounts:
             - name: data
               mountPath: /var/lib/cert-manager
         - name: kubectl
-          image: gcr.io/google_containers/hyperkube:v1.5.2
+          image: gcr.io/google_containers/hyperkube:v1.7.3
           command:
             - "/hyperkube"
           args:
