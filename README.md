@@ -19,6 +19,12 @@ This is not an official Google Project.
 * Demonstrate how to write great documentation for Kubernetes add-ons and extensions.
 * Promote the usage of Let's Encrypt for securing web applications running on Kubernetes.
 
+## Popular Forks
+
+The Kubernetes Certificate Manager has inspired many projects which have added new features and additional domain validation methods.
+
+* [PalmStoneGames/kube-cert-manager](https://github.com/PalmStoneGames/kube-cert-manager)
+
 ## Requirements
 
 * Kubernetes 1.3+
