@@ -85,7 +85,7 @@ func main() {
 	signalChan := make(chan os.Signal, 1)
 	signal.Notify(signalChan, syscall.SIGINT, syscall.SIGTERM)
 
-	<-signalChan:
+	<-signalChan
 	log.Printf("Shutdown signal received, exiting...")
 	close(doneChan)
 	wg.Wait()
