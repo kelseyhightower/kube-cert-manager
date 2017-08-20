@@ -4,13 +4,13 @@ steps:
     id: "git-clone-dns01-exec-plugins"
 
   - name: "gcr.io/cloud-builders/go"
-    env: ["GOPATH=/workspace/plugins", "GO_ENABLED=0"]
+    env: ["GOPATH=/workspace/plugins", "CGO_ENABLED=0"]
     args: ["build", "-tags", "netgo", "-o", "/workspace/googledns", "."]
     dir: 'plugins/src/github.com/kelseyhightower/dns01-exec-plugins/googledns'
     id: "go-build-googledns"
 
   - name: "gcr.io/cloud-builders/go"
-    env: ["PROJECT_ROOT=kube-cert-manager", "GO_ENABLED=0"]
+    env: ["PROJECT_ROOT=kube-cert-manager", "CGO_ENABLED=0"]
     args: ["build", "-tags", "netgo", "."]
     id: "go-build-kube-cert-manager"
 
