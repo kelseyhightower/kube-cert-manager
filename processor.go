@@ -131,15 +131,14 @@ func processCertificate(c Certificate, db *bolt.DB) error {
 	}
 
 	if account.Account.URI == "" {
-		err = acmeClient.Register(account.Account)
+		account.Account.AgreedTerms = account.Account.CurrentTerms
+
+		registeredAccount, err := acmeClient.Register(account.Account)
 		if err != nil {
 			return errors.New("Error registering account: " + err.Error())
 		}
-		account.Account.AgreedTerms = account.Account.CurrentTerms
-		err = acmeClient.UpdateReg(account.Account.URI, account.Account)
-		if err != nil {
-			return errors.New("Error agreeing to terms" + err.Error())
-		}
+
+		account.Account = registeredAccount
 
 		err = saveAccount(account, db)
 		if err != nil {
@@ -165,12 +164,16 @@ func processCertificate(c Certificate, db *bolt.DB) error {
 		return nil
 	}
 
-	authorization, challenge, err := acmeClient.Authorize(account.Account.Authz, c.Spec.Domain)
+	authorization, challenge, err := acmeClient.Authorize(c.Spec.Domain)
 	if err != nil {
 		return errors.New("Error authorizing account: " + err.Error())
 	}
 
-	jwkThumbprint := acme.JWKThumbprint(&account.AccountKey.PublicKey)
+	jwkThumbprint, err := acme.JWKThumbprint(&account.AccountKey.PublicKey)
+	if err != nil {
+		return errors.New("Error generating the JWK thumbprint: " + err.Error())
+	}
+
 	fqdn, value, ttl := DNSChallengeRecord(c.Spec.Domain, challenge.Token, jwkThumbprint)
 
 	dnsExecClient := &dnsClient{

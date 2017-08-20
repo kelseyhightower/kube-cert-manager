@@ -12,6 +12,7 @@ package main
 
 import (
 	"bytes"
+	"context"
 	"crypto/rand"
 	"crypto/rsa"
 	"crypto/x509"
@@ -47,29 +48,29 @@ type Account struct {
 
 type ACMEClient struct {
 	acme.Client
-	endpoint *acme.Endpoint
 }
 
 func newACMEClient(discoveryURL string, key *rsa.PrivateKey) (*ACMEClient, error) {
-	endpoint, err := getEndpoint(discoveryURL)
+	acmeClient := acme.Client{
+		HTTPClient:   &httpClient,
+		Key:          key,
+		DirectoryURL: discoveryURL,
+	}
+
+	_, err := acmeClient.Discover(context.Background())
 	if err != nil {
 		return nil, err
 	}
 
-	acmeClient := acme.Client{
-		Client: httpClient,
-		Key:    key,
-	}
-
-	return &ACMEClient{acmeClient, &endpoint}, nil
+	return &ACMEClient{acmeClient}, nil
 }
 
-func (c *ACMEClient) Register(account *acme.Account) error {
-	return c.Client.Register(c.endpoint.RegURL, account)
+func (c *ACMEClient) Register(account *acme.Account) (*acme.Account, error) {
+	return c.Client.Register(context.Background(), account, acme.AcceptTOS)
 }
 
-func (c *ACMEClient) Authorize(url, domain string) (*acme.Authorization, *acme.Challenge, error) {
-	authorization, err := c.Client.Authorize(url, domain)
+func (c *ACMEClient) Authorize(domain string) (*acme.Authorization, *acme.Challenge, error) {
+	authorization, err := c.Client.Authorize(context.Background(), domain)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -77,7 +78,7 @@ func (c *ACMEClient) Authorize(url, domain string) (*acme.Authorization, *acme.C
 	var challenge *acme.Challenge
 	for _, c := range authorization.Challenges {
 		if c.Type == "dns-01" {
-			challenge = &c
+			challenge = c
 			break
 		}
 	}
@@ -88,12 +89,12 @@ func (c *ACMEClient) Authorize(url, domain string) (*acme.Authorization, *acme.C
 }
 
 func (c *ACMEClient) Accept(authorization *acme.Authorization, challenge *acme.Challenge) error {
-	if _, err := c.Client.Accept(challenge); err != nil {
+	if _, err := c.Client.Accept(context.Background(), challenge); err != nil {
 		return err
 	}
 
 	for {
-		authorization, err := c.GetAuthz(authorization.URI)
+		authorization, err := c.GetAuthorization(context.Background(), authorization.URI)
 		if err != nil {
 			return err
 		}
@@ -119,22 +120,15 @@ func (c *ACMEClient) CreateCert(domain string, key *rsa.PrivateKey) ([]byte, str
 		return nil, "", err
 	}
 
-	cert, certURL, err := c.Client.CreateCert(c.endpoint.CertURL, csr, certExpiry, certBundle)
+	cert, certURL, err := c.Client.CreateCert(context.Background(), csr, certExpiry, certBundle)
 	if err != nil {
 		return nil, "", err
 	}
 
 	if cert == nil {
-		for {
-			cert, err = acme.FetchCert(&httpClient, certURL, certBundle)
-			if err == nil {
-				break
-			}
-			d := 3 * time.Second
-			if re, ok := err.(acme.RetryError); ok {
-				d = time.Duration(re)
-			}
-			time.Sleep(d)
+		cert, err = c.Client.FetchCert(context.Background(), certURL, certBundle)
+		if err != nil {
+			return nil, "", err
 		}
 	}
 
@@ -148,7 +142,7 @@ func (c *ACMEClient) CreateCert(domain string, key *rsa.PrivateKey) ([]byte, str
 }
 
 func (c *ACMEClient) RenewCert(certURL string) ([]byte, error) {
-	cert, err := acme.FetchCert(&httpClient, certURL, certBundle)
+	cert, err := c.Client.FetchCert(context.Background(), certURL, certBundle)
 	if err != nil {
 		return nil, err
 	}
@@ -230,8 +224,4 @@ func deleteAccount(domain string, db *bolt.DB) error {
 		return tx.Bucket([]byte("Accounts")).Delete([]byte(domain))
 	})
 	return err
-}
-
-func getEndpoint(url string) (acme.Endpoint, error) {
-	return acme.Discover(&httpClient, url)
 }
