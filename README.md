@@ -9,6 +9,8 @@ This is not an official Google Project.
 * Domain validation using ACME [dns-01 challenges](https://letsencrypt.github.io/acme-spec/#rfc.section.7.4).
 * Support for multiple DNS providers via [dns-01 exec plugins](https://github.com/kelseyhightower/dns01-exec-plugins)
 
+> The secrets created by the Kubernetes Certificate Manager can be used to configure any TLS terminating load balancer.
+
 ## Project Goals
 
 * Demonstrate how to build custom Kubernetes controllers.
